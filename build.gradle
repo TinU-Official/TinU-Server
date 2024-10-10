@@ -32,8 +32,13 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-streams' // streams를 사용하는 경우 단일 클러스터 내에서만 사용 가능. 뭘 쓸지는 추후 결정할듯
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.springframework.kafka:spring-kafka'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+	//mysql 연동
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	//redis 연동
+//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//	compileOnly 'org.projectlombok:lombok'
+//	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
