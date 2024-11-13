@@ -1,0 +1,60 @@
+name: '❌Delete'
+description: 'Delete 작업 시 입력해주세요.'
+labels: [🔥 Delete]
+title: '❌[Delete] : '
+body:
+  - type: input
+    id: branch
+    attributes:
+      label: '브랜치 이름 (Branch Name)'
+      description: '생성할 브랜치 이름을 작성해주세요.'
+      placeholder: 'chat-implement'
+    validations:
+      required: true
+
+  - type: input
+    id: description
+    attributes:
+      label: '이슈 내용(Description)'
+      description: '삭제할 기능에 대해서 간략히 설명해주세요'
+    validations:
+      required: true
+
+  - type: input
+    id: start_date
+    attributes:
+      label: '시작 날짜 (Start Date)'
+      description: '시작 날짜를 YYYY-MM-DD 형식으로 입력해주세요'
+      placeholder: '2024-01-01'
+    validations:
+      required: true
+
+  - type: input
+    id: due_date
+    attributes:
+      label: '기한 (Due Date)'
+      description: '기한을 YYYY-MM-DD 형식으로 입력해주세요'
+      placeholder: '2024-12-31'
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: '체크리스트(Tasks)'
+      description: '해당 이슈에 대해 필요한 작업목록을 작성해주세요'
+      value: |
+        - [ ] Task1
+        - [ ] Task2
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: '참조(References)'
+      description: '해당 이슈과 관련된 레퍼런스를 참조해주세요'
+      value: |
+        - Reference1
+    validations:
+      required: false

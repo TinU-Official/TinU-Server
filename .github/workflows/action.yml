@@ -4,49 +4,49 @@ on:
   push:
   pull_request:
     branches:
-      - unknown # 작동 비활성화 상태, 현재 테스트 코드임
+      - develop 
       
-jobs:
-  backend-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      # SOURCE 단계 - 저장소 Checkout
-      - name: Checkout-source code
-        uses: actions/checkout@v3
+# jobs:
+#   backend-deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       # SOURCE 단계 - 저장소 Checkout
+#       - name: Checkout-source code
+#         uses: actions/checkout@v3
 
-      # Gradle 실행권한 부여
-      - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+#       # Gradle 실행권한 부여
+#       - name: Grant execute permission to gradlew
+#         run: chmod +x ./gradlew
 
-      # Spring boot application 빌드
-      - name: Build with gradle
-        run: ./gradlew clean build
+#       # Spring boot application 빌드
+#       - name: Build with gradle
+#         run: ./gradlew clean build
 
-      # docker image 빌드
-      - name: Build docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }} .
+#       # docker image 빌드
+#       - name: Build docker image
+#         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }} .
 
-      # docker hub 로그인
-      - name: Login docker hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       # docker hub 로그인
+#       - name: Login docker hub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # docker hub 퍼블리시
-      - name: Publish to docker hub
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
+#       # docker hub 퍼블리시
+#       - name: Publish to docker hub
+#         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
 
-      # AWS Instance 접속 & Application 실행
-      - name: Connect to AWS & Execute Application
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_SSH_KEY }}
-          port: ${{ secrets.AWS_SSH_PORT }}
-          script: |
-            docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-            docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
-            docker run -d -p 8080:8080 --name ${{ secrets.DOCKER_CONTAINER_NAME }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}       
+#       # AWS Instance 접속 & Application 실행
+#       - name: Connect to AWS & Execute Application
+#         uses: appleboy/ssh-action@v0.1.6
+#         with:
+#           host: ${{ secrets.AWS_HOST }}
+#           username: ${{ secrets.AWS_USERNAME }}
+#           key: ${{ secrets.AWS_SSH_KEY }}
+#           port: ${{ secrets.AWS_SSH_PORT }}
+#           script: |
+#             docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
+#             docker rm ${{ secrets.DOCKER_CONTAINER_NAME }} || true
+#             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
+#             docker run -d -p 8080:8080 --name ${{ secrets.DOCKER_CONTAINER_NAME }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}       
