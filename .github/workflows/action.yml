@@ -60,5 +60,6 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           port: ${{ secrets.AWS_SSH_PORT }}
           script: |
+            docker stop ${{ secrets.DOCKER_CONTAINER_NAME }} || true
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
             docker run -d -p 8080:8080 --name ${{ secrets.DOCKER_CONTAINER_NAME }} ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}       
