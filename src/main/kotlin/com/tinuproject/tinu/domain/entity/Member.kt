@@ -4,9 +4,13 @@ import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import com.tinuproject.tinu.domain.enum.Gender
 import com.tinuproject.tinu.domain.enum.Social
 import jakarta.persistence.*
+import java.util.*
 
 @Entity
 class Member (
+
+    @Column(columnDefinition = "BINARY(16)", unique = true)
+    var userID : UUID,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="university_id")
