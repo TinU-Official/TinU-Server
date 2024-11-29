@@ -9,7 +9,7 @@ import java.util.*
 @Entity
 class Member (
 
-    @Column
+    @Column(columnDefinition = "BINARY(16)", unique = true)
     var userID : UUID,
 
     @ManyToOne(fetch = FetchType.LAZY)

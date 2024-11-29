@@ -11,7 +11,7 @@ import java.util.UUID
 
 @Entity
 class SocialMember(
-    @Column
+    @Column(columnDefinition = "BINARY(16)", unique = true)
     var userId : UUID,
 
     @Column
