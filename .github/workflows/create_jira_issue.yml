@@ -62,8 +62,16 @@ jobs:
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
 
       - name: Create branch with Ticket number
+        if: ${{ steps.issue-parser.outputs.issueparser_is_only_branch != '브랜치만 생성할래요' }}
         run: |
           BRANCH_NAME="${{ steps.create.outputs.issue }}/${{ steps.issue-parser.outputs.issueparser_branch }}"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
+
+      - name: Create branch without Ticket number
+        if: ${{ steps.issue-parser.outputs.issueparser_is_only_branch == '브랜치만 생성할래요' }}
+        run: |
+          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_branch }}"
           git checkout -b $BRANCH_NAME
           git push origin $BRANCH_NAME
 
