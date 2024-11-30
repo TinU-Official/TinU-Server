@@ -13,7 +13,7 @@ body:
       required: true
 
   - type: checkboxes
-    id: is_only_issue
+    id: is_only_github_issue
     attributes:
       label: '깃허브 이슈만 생성할까요?'
       description: '체크하시면 지라 이슈와 브랜치가 생성되지 않으며 깃허브 이슈만 생성됩니다.'
