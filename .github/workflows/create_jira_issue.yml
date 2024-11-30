@@ -18,7 +18,7 @@ jobs:
       - name: Checkout main code
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: develop
 
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
@@ -60,11 +60,6 @@ jobs:
       - name: Log created issue
         if: ${{ steps.issue-parser.outputs.issueparser_is_only_branch != '브랜치만 생성할래요' }}
         run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
-
-      - name: Checkout develop code
-        uses: actions/checkout@v4
-        with:
-          ref: develop
 
       - name: Create branch with Ticket number
         run: |
