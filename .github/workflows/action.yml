@@ -39,60 +39,6 @@ jobs:
           management.endpoints.web.base-path=${{ secrets.ACTUATOR_BASE_PATH }}
           EOF
 
-      # prometheus.yml 생성
-      - name: create prometheus.yml
-        run: |
-          cat <<EOF > prometheus.yml
-          global:
-            scrape_interval: 10s
-            evaluation_interval: 10s
-          scrape_configs:
-            - job_name: 'tinu-spring-actuator'
-              metrics_path: ${{ secrets.SPRING_ACTUATOR_ENDPOINT }} 
-              static_configs:
-                - targets: ${{ secrets.SPRING_ACTUATOR_TARGETS }}
-          
-            - job_name: 'tinu-ec2-node-exporter'
-              metrics_path: ${{ secrets.NODE_EXPORTER_ENDPOINT }} 
-              static_configs:
-                - targets: ${{ secrets.NODE_EXPORTER_TARGETS }} 
-          EOF
-
-      # docker-compose.yml 생성
-      - name: create docker-compose.yml
-        run: |
-          cat <<EOF > docker-compose.yml
-          version: "3.3"
-          services:
-            tinu-server:
-              image: ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
-              container_name: ${{ secrets.DOCKERHUB_IMAGENAME }}
-              ports:
-                - 8080:8080
-              restart: unless-stopped
-          
-            node-exporter:
-              image: prom/node-exporter
-              container_name: tinu-ec2-node-exporter
-              ports:
-                - ${{ secrets.DOCKER_NODE_EXPORTER_PORTS }}
-              restart: unless-stopped
-          
-            prometheus:
-              image: prom/prometheus
-              ports:
-                - ${{ secrets.DOCKER_PROMETHEUS_PORTS }}
-              volumes:
-                - ./prometheus.yml:/etc/prometheus/prometheus.yml
-                - prom_data:/prometheus
-              command:
-                - '--config.file=/etc/prometheus/prometheus.yml'
-              restart: unless-stopped
-          
-            volumes:
-              prom_data:
-          EOF
-
     # docker image 빌드
       - name: Build docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }} .
@@ -117,5 +63,6 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           port: ${{ secrets.AWS_SSH_PORT }}
           script: |
+            cd app/
             docker-compose down
             docker-compose up --build
