@@ -34,7 +34,7 @@ jobs:
           spring.jackson.time-zone=Asia/Seoul
           spring.jpa.hibernate.ddl-auto=update
           spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-          management.server.port=8082 ${{ secrets.SPRING_ACTUATOR_PORT }}
+          management.server.port=${{ secrets.SPRING_ACTUATOR_PORT }}
           management.endpoints.web.exposure.include=${{ secrets.ENABLE_ACTUATOR_ENDPOINT }} 
           management.endpoints.web.base-path=${{ secrets.ACTUATOR_BASE_PATH }}
           EOF
