@@ -34,10 +34,9 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 	//mysql 연동
 	runtimeOnly 'com.mysql:mysql-connector-j'
-	//redis 연동
-//	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-//	compileOnly 'org.projectlombok:lombok'
-//	annotationProcessor 'org.projectlombok:lombok'
+	//monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
