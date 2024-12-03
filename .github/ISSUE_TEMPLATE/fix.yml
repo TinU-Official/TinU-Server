@@ -13,13 +13,12 @@ body:
       required: true
 
   - type: checkboxes
-    id: is_only_branch
+    id: is_only_github_issue
     attributes:
-      label: '브랜치만 생성할까요?'
-      description: '체크하시면 지라 이슈와 이슈 티켓 넘버가 생성되지 않으며 브랜치만 생성됩니다.'
+      label: '깃허브 이슈만 생성할까요?'
+      description: '체크하시면 지라 이슈와 브랜치가 생성되지 않으며 깃허브 이슈만 생성됩니다.'
       options:
-        - label: 브랜치만 생성할래요
-
+        - label: 깃허브 이슈만 생성할래요
 
   - type: input
     id: description
