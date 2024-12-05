@@ -41,6 +41,7 @@ jobs:
           spring.cloud.aws.region.static=ap-northeast-2
           aws.s3.bucket=${{ secrets.S3_BUCKET }}
           aws.s3.file.max-size=10485760
+          cloudfront.domain=${{ secrets.CDN_DOMAIN }}
           EOF
 
     # docker image 빌드
