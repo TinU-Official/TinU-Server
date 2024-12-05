@@ -32,6 +32,9 @@ dependencies {
 	implementation 'org.apache.kafka:kafka-streams' // streams를 사용하는 경우 단일 클러스터 내에서만 사용 가능. 뭘 쓸지는 추후 결정할듯
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.springframework.kafka:spring-kafka'
+	//s3 연동
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+	implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1")
 	//mysql 연동
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	//monitoring
