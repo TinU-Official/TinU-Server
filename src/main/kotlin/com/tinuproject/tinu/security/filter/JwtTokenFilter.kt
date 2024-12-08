@@ -44,6 +44,8 @@ class JwtTokenFilter(
         val cookies = httpServeletRequest.cookies
         var hasToken : Boolean = false
         var accesToken : String = ""
+        if(cookies==null) throw Exception()
+
         for(cookie in cookies){
             //Cookie들 중 AccessToken을 갖고 있는지
             if(cookie.name.equals(ACCESSTOKEN_COOKIE)){
