@@ -2,14 +2,14 @@ package com.tinuproject.tinu.s3.controller
 
 import com.tinuproject.tinu.DTO.ResponseDTO
 import com.tinuproject.tinu.s3.dto.request.*
-import com.tinuproject.tinu.s3.service.S3Service
+import com.tinuproject.tinu.s3.service.S3ServiceImpl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/multimedia")
 class S3Controller(
-        private val s3Service: S3Service,
+        private val s3ServiceImpl: S3ServiceImpl,
 ) {
 
     @PostMapping("/initiateUpload")
@@ -18,7 +18,7 @@ class S3Controller(
         val responseDTO = ResponseDTO(
                 isSuccess = true,
                 stateCode = 200,
-                result = s3Service.initiateUpload(s3UploadInitiateRequest)
+                result = s3ServiceImpl.initiateUpload(s3UploadInitiateRequest)
         )
 
         return ResponseEntity.ok().body(responseDTO)
@@ -30,7 +30,7 @@ class S3Controller(
         val responseDTO = ResponseDTO(
                 isSuccess = true,
                 stateCode = 200,
-                result = s3Service.getUploadPreSignedUrl(s3UploadPresignedUrlRequest)
+                result = s3ServiceImpl.getUploadPreSignedUrl(s3UploadPresignedUrlRequest)
         )
 
         return ResponseEntity.ok().body(responseDTO)
@@ -42,7 +42,7 @@ class S3Controller(
         val responseDTO = ResponseDTO(
                 isSuccess = true,
                 stateCode = 200,
-                result = s3Service.completeUpload(s3UploadCompleteRequest)
+                result = s3ServiceImpl.completeUpload(s3UploadCompleteRequest)
         )
 
         return ResponseEntity.ok().body(responseDTO)
@@ -54,7 +54,7 @@ class S3Controller(
         val responseDTO = ResponseDTO(
                 isSuccess = true,
                 stateCode = 200,
-                result = s3Service.abortUpload(s3UploadAbortRequest)
+                result = s3ServiceImpl.abortUpload(s3UploadAbortRequest)
         )
 
         return ResponseEntity.ok().body(responseDTO)
@@ -66,7 +66,7 @@ class S3Controller(
         val responseDTO = ResponseDTO(
                 isSuccess = true,
                 stateCode = 200,
-                result = s3Service.deleteObject(s3DeleteRequest)
+                result = s3ServiceImpl.deleteObject(s3DeleteRequest)
         )
 
         return ResponseEntity.ok().body(responseDTO)
