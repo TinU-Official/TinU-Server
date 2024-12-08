@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  tinu-server:
+    image: tinu24/tinu-server
+    container_name: tinu-server
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/rules.yml:/etc/prometheus/rules.yml
+      - prom_data:/prometheus
+    restart: unless-stopped
+
+volumes:
+  prom_data:
