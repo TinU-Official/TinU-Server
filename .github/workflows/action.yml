@@ -36,6 +36,12 @@ jobs:
           management.server.port=${{ secrets.SPRING_ACTUATOR_PORT }}
           management.endpoints.web.exposure.include=${{ secrets.ENABLE_ACTUATOR_ENDPOINTS }}
           management.endpoints.web.base-path=${{ secrets.ACTUATOR_BASE_PATH }}
+          spring.cloud.aws.credentials.access-key=${{ secrets.S3_ACCESS_KEY }}
+          spring.cloud.aws.credentials.secret-key=${{ secrets.S3_SECRET_KEY }}
+          spring.cloud.aws.region.static=ap-northeast-2
+          aws.s3.bucket=${{ secrets.S3_BUCKET }}
+          aws.s3.file.max-size=10485760
+          cloudfront.domain=${{ secrets.CDN_DOMAIN }}
           EOF
 
     # docker image 빌드
