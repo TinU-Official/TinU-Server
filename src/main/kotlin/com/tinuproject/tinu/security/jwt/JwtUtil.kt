@@ -95,7 +95,7 @@ class JwtUtil {
         }catch(e : SignatureException){
             log.warn("Claim이 유효하지 않은 토큰입니다.{}",e.message)
             //TODO(유효하지 않는 토큰 처리")
-            throw Exception()
+            throw e
         }catch (e : Exception){
             log.warn("토큰과 관련한 예기치 못한 에러가 발생했습니다.")
             //TODO(예상치 못한 오류 에러로 처리)

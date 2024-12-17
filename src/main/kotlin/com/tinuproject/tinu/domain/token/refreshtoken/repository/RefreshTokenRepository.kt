@@ -1,4 +1,4 @@
-package com.tinuproject.tinu.security
+package com.tinuproject.tinu.domain.token.refreshtoken.repository
 
 import com.tinuproject.tinu.domain.entity.RefreshToken
 import jakarta.persistence.ManyToOne
@@ -8,7 +8,6 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import java.util.*
 
-@Repository
 interface RefreshTokenRepository:CrudRepository<RefreshToken, Long> {
 
     fun findByUserId(userId : UUID) : RefreshToken
