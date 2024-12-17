@@ -70,12 +70,14 @@ class SecurityConfig(
                     authorize
                         //TODO(배포 전 로그인 되어 있어야만 서비스 이용가능하게 변경)
                         .requestMatchers("/**").authenticated()
-//                        .requestMatchers("/**").permitAll()//로그인 여부 상관없이 적용
+//                        .requestMatchers("/loginpage.html").permitAll()//로그인 여부 상관없이 적용
                         .anyRequest().authenticated()//로그인 이후엔 모두 허용
                 }
             )
             .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
+                    //TODO(이후 프론트 로그인 페이지로 연결 되게끔.)- 기본은 (백엔드 도메인)/login
+                    //.loginPage("http://localhost:8080/loginpage.html").permitAll()
                     .successHandler(oauth2LoginSuccessHandler) // 로그인 성공 시 핸들러
                     .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
             }
@@ -85,6 +87,7 @@ class SecurityConfig(
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 }
             }
+
             //TODO(이후 FILTER 제작 이후 추가)
 //            httpSecurity
 //                .addFilterBefore(JwtTokenFilter(jwtUtil), UsernamePasswordAuthenticationFilter::class.java)

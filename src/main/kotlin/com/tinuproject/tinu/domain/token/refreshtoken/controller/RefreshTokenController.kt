@@ -1,5 +1,6 @@
-package com.tinuproject.tinu.domain.token.refreshtoken
+package com.tinuproject.tinu.domain.token.refreshtoken.controller
 
+import com.tinuproject.tinu.domain.exception.base.ResponseDTO
 import com.tinuproject.tinu.domain.exception.token.InvalidedTokenException
 import com.tinuproject.tinu.domain.exception.token.NotFoundTokenException
 import com.tinuproject.tinu.domain.token.Tokens
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CookieValue
@@ -30,7 +32,7 @@ class RefreshTokenController(
 
 
     @GetMapping("/generate")
-    fun generateAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "RefreshToken") refreshToken : String?): ResponseEntity<Map<String, Any>> {
+    fun generateAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "RefreshToken") refreshToken : String?): ResponseEntity<ResponseDTO> {
         var tokens : Tokens
         log.info("AccessToken 갱신 시도")
         if(refreshToken==null){
@@ -48,7 +50,13 @@ class RefreshTokenController(
 
         body.put("Tokens",tokens)
 
-        var responseEntity : ResponseEntity<Map<String, Any>> = ResponseEntity.ok().body(body)
+        val result = ResponseDTO(
+            isSucess = true,
+            httpStatusCode = HttpStatus.OK.ordinal,
+            result = body
+        )
+
+        var responseEntity : ResponseEntity<ResponseDTO> = ResponseEntity.ok().body(result)
         return responseEntity
     }
 }
