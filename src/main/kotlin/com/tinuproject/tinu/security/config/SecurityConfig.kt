@@ -1,5 +1,9 @@
 package com.tinuproject.tinu.security.config
 
+import com.tinuproject.tinu.security.filter.JwtTokenFilter
+import com.tinuproject.tinu.security.jwt.JwtUtil
+import com.tinuproject.tinu.security.oauth2.handler.OAuthLoginFailureHandler
+import com.tinuproject.tinu.security.oauth2.handler.OAuthLoginSuccessHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -17,10 +21,14 @@ import org.springframework.security.config.annotation.web.configurers.SessionMan
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
+    private val jwtUtil: JwtUtil,
+    private val oauth2LoginSuccessHandler: OAuthLoginSuccessHandler,
+    private val oAuthLoginFailureHandler: OAuthLoginFailureHandler
 ) {
 
     @Bean
@@ -28,7 +36,7 @@ class SecurityConfig(
         return WebSecurityCustomizer { web: WebSecurity ->
             //로그인이 아예 안되어 있어도 괜찮은 api
             //해당 ""에 API 추가시 해당 API는 필터를 거치지 않음.
-            web.ignoring().requestMatchers("")
+//            web.ignoring().requestMatchers("")
         }
     }
 
@@ -61,15 +69,15 @@ class SecurityConfig(
                 Customizer { authorize ->
                     authorize
                         //TODO(배포 전 로그인 되어 있어야만 서비스 이용가능하게 변경)
-                        .requestMatchers("/**").permitAll()//로그인 여부 상관없이 적용
+                        .requestMatchers("/**").authenticated()
+//                        .requestMatchers("/**").permitAll()//로그인 여부 상관없이 적용
                         .anyRequest().authenticated()//로그인 이후엔 모두 허용
                 }
             )
             .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
-                    //TODO(핸들러 제작 이후 추가)
-                    //.successHandler() // 로그인 성공 시 핸들러
-                    //.failureHandler() // 로그인 실패 시 핸들러
+                    .successHandler(oauth2LoginSuccessHandler) // 로그인 성공 시 핸들러
+                    .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
             }
             .sessionManagement {
                 Customizer { session: SessionManagementConfigurer<HttpSecurity?> ->
@@ -78,6 +86,8 @@ class SecurityConfig(
                 }
             }
             //TODO(이후 FILTER 제작 이후 추가)
+//            httpSecurity
+//                .addFilterBefore(JwtTokenFilter(jwtUtil), UsernamePasswordAuthenticationFilter::class.java)
 
         return httpSecurity.build()
 
