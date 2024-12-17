@@ -44,7 +44,10 @@ class OAuthLoginSuccessHandler(
 
 
     @Value("\${jwt.refresh-token.expiration-time}")
-    private val REFRESH_TOKEN_EXPIRATION_TIME: Long // 리프레쉬 토큰 유효기간
+    private val REFRESH_TOKEN_EXPIRATION_TIME: Long, // 리프레쉬 토큰 유효기간
+
+    @Value("\${cookie.max-age}")
+    private val COOKIE_MAX_AGE : Int
 
 
 ) : SimpleUrlAuthenticationSuccessHandler() {
@@ -120,7 +123,7 @@ class OAuthLoginSuccessHandler(
         cookie.path = "/"
         cookie.isHttpOnly = false
         cookie.secure = false
-        cookie.maxAge = 3600
+        cookie.maxAge = COOKIE_MAX_AGE
 
         return cookie
     }
