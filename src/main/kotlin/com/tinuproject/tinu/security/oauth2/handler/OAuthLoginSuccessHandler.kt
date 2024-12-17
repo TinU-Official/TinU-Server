@@ -4,7 +4,7 @@ import com.tinuproject.tinu.domain.entity.RefreshToken
 import com.tinuproject.tinu.domain.entity.SocialMember
 import com.tinuproject.tinu.domain.enum.Social
 import com.tinuproject.tinu.domain.socialmember.repository.SocialMemberRepository
-import com.tinuproject.tinu.security.RefreshTokenRepository
+import com.tinuproject.tinu.domain.token.refreshtoken.repository.RefreshTokenRepository
 import com.tinuproject.tinu.security.jwt.JwtUtil
 import com.tinuproject.tinu.security.oauth2.dto.KakaoUserInfo
 import com.tinuproject.tinu.security.oauth2.dto.NaverUserInfo
@@ -31,7 +31,7 @@ class OAuthLoginSuccessHandler(
 
     private val jwtUtil: JwtUtil,
 
-    private val userRepository: SocialMemberRepository ,
+    private val userRepository: SocialMemberRepository,
 
     private val refreshTokenRepository: RefreshTokenRepository,
 

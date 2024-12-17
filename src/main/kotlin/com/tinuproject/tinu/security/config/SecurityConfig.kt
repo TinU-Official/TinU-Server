@@ -36,7 +36,7 @@ class SecurityConfig(
         return WebSecurityCustomizer { web: WebSecurity ->
             //로그인이 아예 안되어 있어도 괜찮은 api
             //해당 ""에 API 추가시 해당 API는 필터를 거치지 않음.
-//            web.ignoring().requestMatchers("")
+            web.ignoring().requestMatchers("/api/token/**")
         }
     }
 
