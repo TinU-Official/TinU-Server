@@ -10,7 +10,8 @@ open class BaseException(
 
     override fun getResponse(): ResponseDTO {
         var map : MutableMap<String, Any> = mutableMapOf()
-        map["message"] = tokenErrorCode.message
+        map["error-message"] = tokenErrorCode.message
+        map["stateCode"] = tokenErrorCode.stateCode
         return ResponseDTO(isSucess = false, httpStatusCode = tokenErrorCode.httpStatusCode, result = map)
     }
 }
