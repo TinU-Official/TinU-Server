@@ -6,6 +6,7 @@ import com.tinuproject.tinu.domain.exception.token.NotFoundTokenException
 import com.tinuproject.tinu.domain.token.Tokens
 import com.tinuproject.tinu.domain.token.refreshtoken.service.RefreshTokenService
 import com.tinuproject.tinu.web.CookieGenerator
+import com.tinuproject.tinu.web.ResponseEntityGenerator
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -39,7 +40,7 @@ class RefreshTokenController(
             throw NotFoundTokenException()
         }
         try{
-            tokens = refreshTokenService.ReissueAccessTokenByRefreshToken(refreshToken)
+            tokens = refreshTokenService.reissueAccessTokenByRefreshToken(refreshToken)
         }catch (e : InvalidedTokenException){
             throw e
         }
@@ -50,13 +51,14 @@ class RefreshTokenController(
 
         body.put("Tokens",tokens)
 
-        val result = ResponseDTO(
-            isSucess = true,
-            httpStatusCode = HttpStatus.OK.ordinal,
-            result = body
-        )
+//        val result = ResponseDTO(
+//            isSuccess = true,
+//            httpStatusCode = HttpStatus.OK.ordinal,
+//            result = body
+//        )
 
-        var responseEntity : ResponseEntity<ResponseDTO> = ResponseEntity.ok().body(result)
+//        var responseEntity : ResponseEntity<ResponseDTO> = ResponseEntity.ok().body(result)
+        val responseEntity = ResponseEntityGenerator.onSuccess(body)
         return responseEntity
     }
 }

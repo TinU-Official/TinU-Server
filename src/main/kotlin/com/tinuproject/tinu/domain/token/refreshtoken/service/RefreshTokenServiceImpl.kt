@@ -1,10 +1,12 @@
 package com.tinuproject.tinu.domain.token.refreshtoken.service
 
 import com.tinuproject.tinu.domain.entity.RefreshToken
+import com.tinuproject.tinu.domain.exception.token.ExpiredTokenException
 import com.tinuproject.tinu.domain.exception.token.InvalidedTokenException
 import com.tinuproject.tinu.domain.token.Tokens
 import com.tinuproject.tinu.domain.token.refreshtoken.repository.RefreshTokenRepository
 import com.tinuproject.tinu.security.jwt.JwtUtil
+import io.jsonwebtoken.ExpiredJwtException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -25,12 +27,9 @@ class RefreshTokenServiceImpl(
 ):RefreshTokenService {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun ReissueAccessTokenByRefreshToken(refreshToken: String): Tokens {
-        try{
-            jwtUtil.validateToken(refreshToken)
-        }catch (e : SignatureException){
-            throw InvalidedTokenException()
-        }
+    override fun reissueAccessTokenByRefreshToken(refreshToken: String): Tokens {
+        jwtUtil.validateToken(refreshToken)
+
 
         val userId :UUID = UUID.fromString(jwtUtil.getUserIdFromToken(refreshToken))
 
@@ -49,5 +48,13 @@ class RefreshTokenServiceImpl(
         val accessToken : String = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME)
 
         return Tokens(accessToken=accessToken, refreshToken = refreshToken)
+    }
+
+    override fun deleteRefreshToken(refreshToken: String) {
+        jwtUtil.validateToken(refreshToken)
+
+        val userId : UUID = UUID.fromString(jwtUtil.getUserIdFromToken(refreshToken))
+
+        refreshTokenRepository.deleteByUserId(userId)
     }
 }

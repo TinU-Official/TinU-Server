@@ -14,20 +14,28 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.PropertySource
+import org.springframework.stereotype.Component
 
 
-@PropertySource("classpath:/secret.yml")
+
 class JwtTokenFilter(
+
     val jwtUtil : JwtUtil,
 
-    ) : GenericFilter(){
+    private val ACCESSTOKEN_COOKIE : String
+
+) : GenericFilter(){
     var log : Logger = LoggerFactory.getLogger(this::class.java);
-    @Value("\${token.access-token}")
-    lateinit var ACCESSTOKEN_COOKIE : String;
+
 
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
         var httpServeletRequest : HttpServletRequest = request as HttpServletRequest
         var accessToken : String
+
+        val requestUrl = httpServeletRequest.requestURL
+        log.info(requestUrl.toString())
+
+
         try{
             accessToken = hasJwtToken(httpServeletRequest)
             validateToken(accessToken)
@@ -58,7 +66,7 @@ class JwtTokenFilter(
     fun hasJwtToken(httpServeletRequest : HttpServletRequest) : String{
         val cookies = httpServeletRequest.cookies
         var hasToken : Boolean = false
-        var accesToken : String = ""
+        var accesToken : String= ""
         if(cookies==null) throw NotFoundTokenException()
 
         for(cookie in cookies){
@@ -78,7 +86,9 @@ class JwtTokenFilter(
     }
 
     fun validateToken(accessToken : String){
+
         jwtUtil.validateToken(accessToken)
+
     }
 
     fun expireToken(accessToken: String){

@@ -1,11 +1,15 @@
 package com.tinuproject.tinu.security.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.tinuproject.tinu.security.filter.ExceptionHandlerFilter
 import com.tinuproject.tinu.security.filter.JwtTokenFilter
 import com.tinuproject.tinu.security.jwt.JwtUtil
 import com.tinuproject.tinu.security.oauth2.handler.OAuthLoginFailureHandler
 import com.tinuproject.tinu.security.oauth2.handler.OAuthLoginSuccessHandler
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.PropertySource
 import org.springframework.security.config.Customizer
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
@@ -28,7 +32,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val jwtUtil: JwtUtil,
     private val oauth2LoginSuccessHandler: OAuthLoginSuccessHandler,
-    private val oAuthLoginFailureHandler: OAuthLoginFailureHandler
+    private val oAuthLoginFailureHandler: OAuthLoginFailureHandler,
+
+    @Value("\${cookie.token.access-token}")
+    private val accessTokenName : String,
+
+    private val objectMapper: ObjectMapper
 ) {
 
     @Bean
@@ -69,8 +78,8 @@ class SecurityConfig(
                 Customizer { authorize ->
                     authorize
                         //TODO(배포 전 로그인 되어 있어야만 서비스 이용가능하게 변경)
+//                        .requestMatchers("").permitAll()
                         .requestMatchers("/**").authenticated()
-//                        .requestMatchers("/loginpage.html").permitAll()//로그인 여부 상관없이 적용
                         .anyRequest().authenticated()//로그인 이후엔 모두 허용
                 }
             )
@@ -88,9 +97,11 @@ class SecurityConfig(
                 }
             }
 
-            //TODO(이후 FILTER 제작 이후 추가)
-//            httpSecurity
-//                .addFilterBefore(JwtTokenFilter(jwtUtil), UsernamePasswordAuthenticationFilter::class.java)
+
+            //TODO(이후 FILTER 제작 이후 추가)- 해결
+            httpSecurity
+                .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil,ACCESSTOKEN_COOKIE=accessTokenName), UsernamePasswordAuthenticationFilter::class.java)
+                .addFilterBefore(ExceptionHandlerFilter(objectMapper), JwtTokenFilter::class.java)
 
         return httpSecurity.build()
 

@@ -1,5 +1,7 @@
 package com.tinuproject.tinu.security.jwt
 
+import com.tinuproject.tinu.domain.exception.token.ExpiredTokenException
+import com.tinuproject.tinu.domain.exception.token.InvalidedTokenException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -10,10 +12,12 @@ import java.security.SignatureException
 import java.util.*
 import javax.crypto.SecretKey
 import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import java.time.Clock
 
 
 @Component
@@ -86,7 +90,6 @@ class JwtUtil {
     //Token 에서 claim 반환하는 메서드
     fun getClaimsFromToken(token : String?) : Claims{
         try{
-
             return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -96,8 +99,12 @@ class JwtUtil {
             log.warn("Claim이 유효하지 않은 토큰입니다.{}",e.message)
             //TODO(유효하지 않는 토큰 처리")
             throw e
-        }catch (e : Exception){
-            log.warn("토큰과 관련한 예기치 못한 에러가 발생했습니다.")
+        }catch(e : ExpiredJwtException){
+            log.warn("토큰이 만료되었습니다.")
+            throw e
+        }
+        catch (e : Exception){
+            log.warn("토큰과 관련한 예기치 못한 에러가 발생했습니다{}.",e.message)
             //TODO(예상치 못한 오류 에러로 처리)
             throw Exception()
         }
@@ -105,7 +112,16 @@ class JwtUtil {
 
     //토큰이 유효한지 확인
     fun validateToken(token : String){
-        getClaimsFromToken(token);
+        try{
+            getClaimsFromToken(token)
+        }catch (e : SignatureException){
+            throw InvalidedTokenException()
+        }catch (e : ExpiredJwtException){
+            throw ExpiredTokenException()
+        }catch (e : Exception){
+            //TODO 서버가 알지 못하는 오류 발생.
+            throw Exception()
+        }
     }
 
     //토큰 속 유저와 실제 기대하는 user의 비교 검증
