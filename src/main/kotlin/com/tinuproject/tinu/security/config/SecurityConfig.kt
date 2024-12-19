@@ -45,7 +45,7 @@ class SecurityConfig(
         return WebSecurityCustomizer { web: WebSecurity ->
             //로그인이 아예 안되어 있어도 괜찮은 api
             //해당 ""에 API 추가시 해당 API는 필터를 거치지 않음.
-            web.ignoring().requestMatchers("/api/token/**")
+            web.ignoring().requestMatchers("/")
         }
     }
 
@@ -78,7 +78,7 @@ class SecurityConfig(
                 Customizer { authorize ->
                     authorize
                         //TODO(배포 전 로그인 되어 있어야만 서비스 이용가능하게 변경)
-//                        .requestMatchers("").permitAll()
+                        .requestMatchers("/api/token/**").permitAll()
                         .requestMatchers("/**").authenticated()
                         .anyRequest().authenticated()//로그인 이후엔 모두 허용
                 }

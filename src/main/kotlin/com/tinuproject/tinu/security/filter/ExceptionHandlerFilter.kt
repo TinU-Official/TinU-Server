@@ -9,6 +9,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.GenericFilter
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.apache.juli.logging.LogFactory
 import org.slf4j.Logger
@@ -16,17 +17,22 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
+import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 
 
 class ExceptionHandlerFilter(
     private val objectMapper: ObjectMapper
-): GenericFilter() {
+): OncePerRequestFilter() {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    )  {
         try {
-            chain!!.doFilter(request, response)
+            filterChain.doFilter(request, response)
         } catch (e: BaseException) {
             //토큰 문제
             setErrorResponse(response, e)
@@ -48,4 +54,6 @@ class ExceptionHandlerFilter(
             }
         }
     }
+
+
 }
