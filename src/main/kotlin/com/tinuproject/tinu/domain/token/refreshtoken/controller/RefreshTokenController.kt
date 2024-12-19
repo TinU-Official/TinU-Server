@@ -49,6 +49,7 @@ class RefreshTokenController(
         httpServletResponse.addCookie(CookieGenerator.createCookies(refreshTokenkey, tokens.refreshToken))
         var body : MutableMap<String, Any> = mutableMapOf()
 
+        //TODO 이후 삭제 예정 잘 보내지는 지 responseBody를 통해 확인하기 위함.
         body.put("Tokens",tokens)
 
 //        val result = ResponseDTO(
@@ -58,6 +59,7 @@ class RefreshTokenController(
 //        )
 
 //        var responseEntity : ResponseEntity<ResponseDTO> = ResponseEntity.ok().body(result)
+
         val responseEntity = ResponseEntityGenerator.onSuccess(body)
         return responseEntity
     }
