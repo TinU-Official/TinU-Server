@@ -33,6 +33,10 @@ class JwtTokenFilter(
         var accessToken : String
 
         val requestUrl = httpServeletRequest.requestURL
+
+        if(requestUrl.contains("/login")){
+            chain!!.doFilter(request,response)
+        }
         log.info(requestUrl.toString())
 
 
@@ -40,13 +44,13 @@ class JwtTokenFilter(
             accessToken = hasJwtToken(httpServeletRequest)
             validateToken(accessToken)
             expireToken(accessToken)
-        }catch (e : NotFoundTokenException){//TODO(토큰이 없음을 나타내는 Exception을 매개변수로 설정) - 토큰이 없음.
+        }catch (e : NotFoundTokenException){
             log.warn("토큰이 없습니다.")
             throw e
-        }catch (e : InvalidedTokenException){//TODO(토큰이 유효하지 않음을 나타내는 Exception을 매개변수로 설정) - 토큰은 있지만 잘못된 토큰
+        }catch (e : InvalidedTokenException){
             log.warn("토큰이 유효하지 않습니다.")
             throw e
-        }catch (e : ExpiredTokenException){//TODO(토큰이 만료되었음을 나타내는 Exception을 매개변수로 설정) - 토큰이 있지만 만료됨.
+        }catch (e : ExpiredTokenException){
             log.warn("토큰이 만료되었습니다.")
             throw e
         }
@@ -77,25 +81,18 @@ class JwtTokenFilter(
             }
         }
         //AccessToken을 갖고 있지 않음.
-        if(!hasToken){
-            //TODO(토큰이 없음을 나타내는 Exception 반환) - 해결
-            throw NotFoundTokenException()
-        }
+        if(!hasToken){throw NotFoundTokenException() }
 
         return accesToken
     }
 
     fun validateToken(accessToken : String){
-
         jwtUtil.validateToken(accessToken)
-
     }
 
     fun expireToken(accessToken: String){
         if(jwtUtil.isExpired(accessToken)){
-            //TODO(토큰이 만료되었음을 나타내는 Exception 반환) - 해결
             throw ExpiredTokenException()
         }
     }
-
 }

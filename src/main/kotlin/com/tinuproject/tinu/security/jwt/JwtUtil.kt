@@ -2,6 +2,7 @@ package com.tinuproject.tinu.security.jwt
 
 import com.tinuproject.tinu.domain.exception.token.ExpiredTokenException
 import com.tinuproject.tinu.domain.exception.token.InvalidedTokenException
+import com.tinuproject.tinu.domain.exception.token.NotFoundTokenException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -60,8 +61,7 @@ class JwtUtil {
         if(StringUtils.hasText(authorizationHeader))
             return authorizationHeader.substring(0)
         else
-            //TODO("이후 토큰이 없는 경우 반환하는 Exception을 만들어서 처리.")
-            throw Exception()
+            throw NotFoundTokenException()
     }
 
     // 토큰에서 유저 id를 반환하는 메서드
@@ -97,7 +97,6 @@ class JwtUtil {
                 .body
         }catch(e : SignatureException){
             log.warn("Claim이 유효하지 않은 토큰입니다.{}",e.message)
-            //TODO(유효하지 않는 토큰 처리")
             throw e
         }catch(e : ExpiredJwtException){
             log.warn("토큰이 만료되었습니다.")
@@ -105,13 +104,14 @@ class JwtUtil {
         }
         catch (e : Exception){
             log.warn("토큰과 관련한 예기치 못한 에러가 발생했습니다{}.",e.message)
-            //TODO(예상치 못한 오류 에러로 처리)
             throw Exception()
         }
     }
 
     //토큰이 유효한지 확인
     fun validateToken(token : String){
+        //parseClamisJWS에서 발생하는 예외를
+        //본 프로젝트에서의 예외로 변경.
         try{
             getClaimsFromToken(token)
         }catch (e : SignatureException){
@@ -119,7 +119,6 @@ class JwtUtil {
         }catch (e : ExpiredJwtException){
             throw ExpiredTokenException()
         }catch (e : Exception){
-            //TODO 서버가 알지 못하는 오류 발생.
             throw Exception()
         }
     }
@@ -135,6 +134,7 @@ class JwtUtil {
         }
     }
 
+    //TODO(필요 없는 코드, 이후 논의 후 수정)
     fun isExpired(token : String) : Boolean{
         return getClaimsFromToken(token).expiration.before(Date())
     }
