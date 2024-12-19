@@ -9,22 +9,22 @@ class ResponseEntityGenerator {
     companion object{
         fun onSuccess(result : Any?) : ResponseEntity<ResponseDTO> {
             val responseDTO = ResponseDTO(
-                isSucess = true,
-                httpStatusCode = HttpStatus.OK.ordinal,
+                isSuccess = true,
+                httpStatusCode = 200,
                 result = result
             )
 
-            return ResponseEntity.status(HttpStatus.OK.ordinal).body(responseDTO)
+            return ResponseEntity.status(200).body(responseDTO)
         }
 
         fun onSuccess(result : Any?, httpStatus : Int) : ResponseEntity<ResponseDTO>{
             val responseDTO = ResponseDTO(
-                isSucess = true,
+                isSuccess = true,
                 httpStatusCode = httpStatus,
                 result = result
             )
 
-            return ResponseEntity.status(HttpStatus.OK.ordinal).body(responseDTO)
+            return ResponseEntity.status(httpStatus).body(responseDTO)
         }
 
         fun onFailure(code : BaseErrorCode) : ResponseEntity<ResponseDTO>{

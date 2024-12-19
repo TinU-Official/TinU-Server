@@ -5,5 +5,7 @@ import org.springframework.stereotype.Service
 
 
 interface RefreshTokenService {
-    fun ReissueAccessTokenByRefreshToken(refreshToken : String) : Tokens
+    fun reissueAccessTokenByRefreshToken(refreshToken : String) : Tokens
+
+    fun deleteRefreshToken(refreshToken: String)
 }

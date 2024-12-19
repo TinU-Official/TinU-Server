@@ -12,6 +12,6 @@ open class BaseException(
         var map : MutableMap<String, Any> = mutableMapOf()
         map["error-message"] = tokenErrorCode.message
         map["stateCode"] = tokenErrorCode.stateCode
-        return ResponseDTO(isSucess = false, httpStatusCode = tokenErrorCode.httpStatusCode, result = map)
+        return ResponseDTO(isSuccess = false, httpStatusCode = tokenErrorCode.httpStatusCode, result = map)
     }
 }
