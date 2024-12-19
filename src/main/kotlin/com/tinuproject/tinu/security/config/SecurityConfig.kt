@@ -85,7 +85,7 @@ class SecurityConfig(
             )
             .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
-                    //TODO(이후 프론트 로그인 페이지로 연결 되게끔.)- 기본은 (백엔드 도메인)/login
+                    //TODO(로그인이 필요한데 안된 부분이 있으면 넘길 수 있는 것.)- 기본은 (백엔드 도메인)/login
                     //.loginPage("http://localhost:8080/loginpage.html").permitAll()
                     .successHandler(oauth2LoginSuccessHandler) // 로그인 성공 시 핸들러
                     .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
@@ -98,10 +98,11 @@ class SecurityConfig(
             }
 
 
-            //TODO(이후 FILTER 제작 이후 추가)- 해결
             httpSecurity
                 .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil,ACCESSTOKEN_COOKIE=accessTokenName), UsernamePasswordAuthenticationFilter::class.java)
                 .addFilterBefore(ExceptionHandlerFilter(objectMapper), JwtTokenFilter::class.java)
+
+
 
         return httpSecurity.build()
 

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
-    //TODO 이걸로도 정상 작동하는지 테스트 아마 될 것으로 예상
     @ExceptionHandler(BaseException::class)
     fun baseException(e : BaseException) : ResponseEntity<ResponseDTO>{
         return ResponseEntityGenerator.onFailure(e)
