@@ -36,6 +36,11 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	//monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	//socket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket:3.3.4' //Sep 19, 2024 ver
+	implementation 'org.webjars:stomp-websocket:2.3.4' // 최신 버전(2021)
+	implementation 'org.webjars:sockjs-client:1.5.1' //if websocket doesn't work in specific environments
+
 	implementation 'io.micrometer:micrometer-registry-prometheus'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5'
