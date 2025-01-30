@@ -11,8 +11,9 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class ChatConfig : WebSocketMessageBrokerConfigurer {
 
-    override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) {
-        stompEndpointRegistry.addEndpoint("/ws-stomp")
+    override fun registerStompEndpoints(stompEndpointRegistry: StompEndpointRegistry) { // 첫 핸드쉐이크 요청
+        stompEndpointRegistry.addEndpoint("/stomp/connect")
+            .setAllowedOriginPatterns("*")
             .withSockJS();
     }
 
