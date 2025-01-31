@@ -1,4 +1,6 @@
-package com.tinuproject.tinu.domain.chat.enum
+package com.tinuproject.tinu.domain.chat.dto
+
+import com.tinuproject.tinu.domain.chat.enum.MessageType
 
 data class ChatMessage(
     var type: MessageType,

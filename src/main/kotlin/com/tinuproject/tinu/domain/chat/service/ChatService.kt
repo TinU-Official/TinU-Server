@@ -1,5 +1,7 @@
 package com.tinuproject.tinu.domain.chat.service
 
+import com.tinuproject.tinu.domain.chat.dto.ChatDTO
+import com.tinuproject.tinu.domain.entity.Chat
 import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 
@@ -26,10 +28,18 @@ class ChatService {
 //        return chatRooms[roomId]
 //    }
 //
-//    // 채팅방 생성
-//    fun createRoom(name: String): ChatRoom {
-//        val chatRoom = ChatRoom.create(name)
-//        chatRooms[chatRoom.roomId] = chatRoom
-//        return chatRoom
-//    }
+    // 채팅방 생성
+    //ChatRoom은 엔티티
+    //추후 엔티티에 create 메서드 추가 필요
+    fun createRoom(name: ChatDTO): Chat {
+        val chat = Chat.create(name)
+        chatRooms[chatRoom.roomId] = chatRoom
+        return chatRoom
+    }
+
+
+    //채팅방 참여
+    fun enterRoom(name: ChatDTO): Chat {
+
+    }
 }
