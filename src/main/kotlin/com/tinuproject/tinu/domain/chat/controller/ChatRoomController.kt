@@ -39,7 +39,7 @@ class ChatRoomController (
     }
 
 
-    //채팅방 입장
+    //채팅방 입장 <- 근데 이거 필요한가? 논의 필요
     //쿠키 검증? 로그인 관련 pr 머지 이후 해결
     //모델 객체 사용 이유?
     @GetMapping("/room/{roomId}")
