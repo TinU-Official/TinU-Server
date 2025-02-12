@@ -1,8 +1,7 @@
-package com.tinuproject.tinu.domain.chat.entity
+package com.tinuproject.tinu.domain.entity
 
-import com.tinuproject.tinu.domain.post.entity.Post
-import com.tinuproject.tinu.global.entity.BaseEntity
-import com.tinuproject.tinu.domain.member.entity.Member
+import com.tinuproject.tinu.domain.chat.dto.ChatDTO
+import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import jakarta.persistence.*
 
 @Entity
@@ -24,4 +23,13 @@ class Chat (
         cascade = [CascadeType.REMOVE],
         mappedBy = "chat")
     var chatList : MutableList<ChatText> = mutableListOf()
-) : BaseEntity()
+) : BaseEntity() {
+//        fun create(dto: ChatDTO, buyer: Member, seller: Member, post: Post): Chat {
+//            return Chat(
+//                buyer = buyer,
+//                seller = seller,
+//                post = post
+//            )
+//        }
+    }
+}
