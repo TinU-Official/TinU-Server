@@ -1,8 +1,8 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enum.PaymentMethod
-import com.tinuproject.tinu.domain.enum.SellMethod
+import com.tinuproject.tinu.domain.enums.PaymentMethod
+import com.tinuproject.tinu.domain.enums.SellMethod
 import jakarta.persistence.*
 
 @Entity

@@ -1,7 +1,6 @@
 package com.tinuproject.tinu.web
 
-import jakarta.servlet.http.Cookie
-import org.apache.coyote.Response
+
 import org.springframework.http.ResponseCookie
 
 class CookieGenerator {

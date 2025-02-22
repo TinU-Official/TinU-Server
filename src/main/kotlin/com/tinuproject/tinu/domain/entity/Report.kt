@@ -1,8 +1,7 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enum.PaymentMethod
-import com.tinuproject.tinu.domain.enum.ReportCategory
+import com.tinuproject.tinu.domain.enums.ReportCategory
 import jakarta.persistence.*
 
 @Entity

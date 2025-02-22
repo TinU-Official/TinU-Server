@@ -1,4 +1,4 @@
-package com.tinuproject.tinu.domain.enum
+package com.tinuproject.tinu.domain.enums
 
 enum class PaymentMethod(var code : Int, var text : String) {
 

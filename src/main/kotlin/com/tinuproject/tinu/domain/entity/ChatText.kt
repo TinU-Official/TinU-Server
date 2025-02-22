@@ -1,8 +1,7 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enum.ChatRole
-import com.tinuproject.tinu.domain.enum.ChatType
+import com.tinuproject.tinu.domain.enums.ChatType
 import jakarta.persistence.*
 
 @Entity

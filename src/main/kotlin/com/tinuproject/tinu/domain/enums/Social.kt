@@ -1,4 +1,4 @@
-package com.tinuproject.tinu.domain.enum
+package com.tinuproject.tinu.domain.enums
 
 enum class Social(var code:Int, var company : String) {
     KAKAO(0, "카카오"),
