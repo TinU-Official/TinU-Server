@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ChatTextRepository : JpaRepository<ChatText, Long> {
 
-    fun findByWriter(userId : Long) : ChatText?
+    fun findByWriterId(userId : Long) : ChatText?
 }

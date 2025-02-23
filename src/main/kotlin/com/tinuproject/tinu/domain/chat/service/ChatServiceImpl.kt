@@ -1,6 +1,7 @@
 package com.tinuproject.tinu.domain.chat.service
 
 import com.tinuproject.tinu.domain.chat.dto.response.ChatListResponse
+import com.tinuproject.tinu.domain.chat.dto.response.CreateChatResponse
 import com.tinuproject.tinu.domain.chat.repository.ChatRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.entity.Chat
@@ -23,8 +24,14 @@ class ChatServiceImpl (
 ) : ChatService
 {
 
+    /*
+    TODO. condition 2 관련 성능개선점
+     post_id로 연관된 Chat 객체를 모두 찾은 다음, 해당 객체에서 buyer_id 속성이 일치하는 지를 판단하여 condition 2를 처리하는데,
+     쿼리를 직접 작성할 수 있다면 그렇게 할 필요 없이 조건에 buyer_id와 post_id를 달아 조회하여 null 여부를 가지고 처리하고 싶다.
+     */
+
     @Transactional
-    override fun createRoom(userId: UUID, postId : Long) : Long {
+    override fun createRoom(userId: UUID, postId : Long) : CreateChatResponse {
         val buyer = memberRepository.findMemberByUserId(userId = userId) ?: throw NotFoundException()
         val post = postRepository.findPostById(postId = postId) ?: throw NotFoundException()
         val chatList = chatRepository.findAllByPostId(postId = postId)
@@ -35,7 +42,11 @@ class ChatServiceImpl (
         if(chatList.any { buyer.id  == it.buyer.id }) throw AlreadyExistChatException()
 
         val chat = chatRepository.save(Chat(buyer = buyer, seller = post.author, post = post))
-        return chat.id ?: throw NotCreatedChatException()
+
+        //condition 3 : 채팅방이 정상적으로 생성되지 않아 id를 가져올 수 없음을 필터링
+        if(chat.id == null) throw NotCreatedChatException()
+
+        return CreateChatResponse(chatId = chat.id)
     }
 
     override fun getList(userId: UUID) : List<ChatListResponse> {
