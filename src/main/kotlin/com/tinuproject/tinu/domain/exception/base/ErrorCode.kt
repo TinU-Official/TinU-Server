@@ -9,7 +9,6 @@ enum class ErrorCode(
     TOKEN_INVALIDED(httpStatusCode = 401, stateCode = "TOKEN_INVALIDED", message = "토큰이 유효하지 않습니다."),
     TOKEN_EXPIRED(httpStatusCode = 401, stateCode = "TOKEN_EXPIRED", message = "토큰이 만료되었습니다."),
 
-
     //멤버 관련
     MEMBER_EXIST_EMAIL(httpStatusCode = 400, stateCode="ALREADY_EXIST_EMAIL", message = "이미 사용중인 이메일입니다."),
     MEMBER_EXIST_NICKNAME(httpStatusCode = 400, stateCode = "ALREADY_EXIST_NICKNAME", message = "이미 사용중인 닉네임입니다."),
@@ -21,6 +20,11 @@ enum class ErrorCode(
     NOT_EXIST_CODE(httpStatusCode = 400, stateCode = "NOT_EXIST_CODE", message = "인증 코드를 재요청해주세요."),
     NOT_MATCH_CODE(httpStatusCode = 400, stateCode = "NOT_MATCH_CODE", message = "인증 코드가 일치하지 않습니다."),
     NEED_EMAIL_AUTH(httpStatusCode = 400, stateCode = "NEED_EMAIL_AUTH", message = "이메일 인증이 필요합니다."),
+
+    //채팅 관련
+    ALREADY_EXIST_CHAT(httpStatusCode = 400, stateCode = "ALREADY_EXIST_CHAT", message = "채팅방이 이미 존재합니다. 새로 생성할 수 없습니다."),
+    NOT_AUTHORITY_FOR_CREATE_CHAT(httpStatusCode = 400, stateCode = "NOT_AUTHORITY_FOR_CREATE_CHAT", message = "채팅방을 만들 권한이 없습니다."),
+    NOT_CREATED_CHAT_ID(httpStatusCode = 400, stateCode = "NOT_CREATED_CHAT_ID", message = "채팅방 생성에 실패했습니다. 다시 시도해주세요."),
 
 
     //전역적 사용
