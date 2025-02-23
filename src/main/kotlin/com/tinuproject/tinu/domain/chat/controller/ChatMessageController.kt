@@ -15,7 +15,7 @@ class ChatMessageController (
     @MessageMapping("/message/{roomId}")
     @SendTo("/room/{roomId}")
     fun sendMessage(message: ChatMessage) {
-        chatService. // 서비스 분리?
+//        chatService. // 서비스 분리?
     }
 
     @MessageMapping("/status/{roomId}")
