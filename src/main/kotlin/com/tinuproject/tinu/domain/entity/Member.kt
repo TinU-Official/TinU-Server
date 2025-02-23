@@ -1,7 +1,6 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enums.Gender
 import com.tinuproject.tinu.domain.enums.Social
 import jakarta.persistence.*
 import java.util.*
@@ -24,10 +23,6 @@ class Member (
 
     @Column
     var grade : Int?,
-
-    @Column
-    @Enumerated(EnumType.ORDINAL)
-    var gender : Gender?,
 
     @Column
     var profileImageURL : String?,

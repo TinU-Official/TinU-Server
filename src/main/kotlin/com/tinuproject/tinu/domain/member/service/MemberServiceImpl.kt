@@ -1,7 +1,6 @@
 package com.tinuproject.tinu.domain.member.service
 
 import com.tinuproject.tinu.domain.entity.Member
-import com.tinuproject.tinu.domain.enums.Gender
 import com.tinuproject.tinu.domain.exception.mail.NeedEmailAuthException
 import com.tinuproject.tinu.domain.exception.member.ExistEmailException
 import com.tinuproject.tinu.domain.exception.member.ExistNameException
@@ -46,14 +45,12 @@ class MemberServiceImpl(
         university ?: throw NotExistDomainException()
 
         val socialMember = socialMemberRepository.findByUserId(userId)
-        val gender = Gender.valueOf(registerRequestDTO.gender)
         val newMember = Member(
             userId = userId,
             university = university,
             nickname = registerRequestDTO.nickName,
             major = registerRequestDTO.major,
             grade = registerRequestDTO.grade,
-            gender = gender,
             profileImageURL = registerRequestDTO.profileImageURL,
             introduction = registerRequestDTO.introduction,
             eMail = registerRequestDTO.eMail,
