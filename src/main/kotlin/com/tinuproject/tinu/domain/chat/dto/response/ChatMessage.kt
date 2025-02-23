@@ -1,4 +1,4 @@
-package com.tinuproject.tinu.domain.chat.dto
+package com.tinuproject.tinu.domain.chat.dto.response
 
 import com.tinuproject.tinu.domain.chat.enum.MessageType
 
