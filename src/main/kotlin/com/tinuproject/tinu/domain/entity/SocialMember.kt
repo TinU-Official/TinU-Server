@@ -1,7 +1,7 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enum.Social
+import com.tinuproject.tinu.domain.enums.Social
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType

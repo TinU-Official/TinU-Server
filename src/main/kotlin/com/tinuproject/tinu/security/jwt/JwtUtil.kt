@@ -18,6 +18,8 @@ import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpHeaders
 import java.time.Clock
 
 
@@ -55,10 +57,11 @@ class JwtUtil {
     }
 
     // 응답 헤더에서 액세스 토큰을 반환하는 메서드
-    fun getTokenFromHeader(authorizationHeader: String): String {
+    fun getTokenFromHeader(httpServletRequest: HttpServletRequest): String {
+        val authorizationHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
         //hasText(token)토큰이 넘어왔는지 확인
         if(StringUtils.hasText(authorizationHeader))
-            return authorizationHeader.substring(0)
+            return authorizationHeader.substring(7)
         else
             throw NotFoundTokenException()
     }
@@ -132,8 +135,5 @@ class JwtUtil {
         }
     }
 
-    //TODO(필요 없는 코드, 이후 논의 후 수정)
-    fun isExpired(token : String) : Boolean{
-        return getClaimsFromToken(token).expiration.before(Date())
-    }
+
 }

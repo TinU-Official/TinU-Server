@@ -6,6 +6,16 @@ import org.springframework.http.ResponseEntity
 
 class ResponseEntityGenerator {
     companion object{
+
+        fun onSuccess() : ResponseEntity<ResponseDTO>{
+            val responseDTO = ResponseDTO(
+                isSuccess = true,
+                stateCode = 200,
+                result = null
+            )
+
+            return ResponseEntity.status(200).body(responseDTO)
+        }
         fun onSuccess(result : Any?) : ResponseEntity<ResponseDTO> {
             val responseDTO = ResponseDTO(
                 isSuccess = true,

@@ -44,3 +44,5 @@ out/
 **/src/main/resources/application.yml
 **/src/main/resources/secret.yml
 
+### Qclass ###
+/src/main/generated/

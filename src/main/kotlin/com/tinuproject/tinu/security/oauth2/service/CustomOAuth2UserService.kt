@@ -1,7 +1,7 @@
 package com.tinuproject.tinu.security.oauth2.service
 
 import com.tinuproject.tinu.domain.entity.SocialMember
-import com.tinuproject.tinu.domain.enum.Social
+import com.tinuproject.tinu.domain.enums.Social
 import com.tinuproject.tinu.domain.socialmember.repository.SocialMemberRepository
 import com.tinuproject.tinu.domain.token.refreshtoken.repository.RefreshTokenRepository
 import com.tinuproject.tinu.security.oauth2.dto.*
@@ -64,6 +64,7 @@ class CustomOAuth2UserService(
         log.info("유저 이름 : {}", name)
         log.info("PROVIDER : {}", provider)
         log.info("PROVIDER_ID : {}", providerId)
+        log.info("USER_ID : {}",user.userId)
 
         return CustomOAuth2User(userInfoDto = userInfoDto)
     }

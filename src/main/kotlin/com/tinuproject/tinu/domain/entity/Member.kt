@@ -1,8 +1,7 @@
 package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
-import com.tinuproject.tinu.domain.enum.Gender
-import com.tinuproject.tinu.domain.enum.Social
+import com.tinuproject.tinu.domain.enums.Social
 import jakarta.persistence.*
 import java.util.*
 
@@ -10,33 +9,29 @@ import java.util.*
 class Member (
 
     @Column(columnDefinition = "BINARY(16)", unique = true)
-    var userID : UUID,
+    var userId : UUID,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="university_id")
     var university: University? = null,
 
     @Column
-    var nickname : String,
+    var nickname : String?,
 
     @Column
-    var major : String,
+    var major : String?,
 
     @Column
-    var grade : Int,
+    var grade : Int?,
 
     @Column
-    @Enumerated(EnumType.ORDINAL)
-    var gender : Gender,
+    var profileImageURL : String?,
 
     @Column
-    var profileImageURL : String,
+    var introduction : String?,
 
     @Column
-    var introduction : String,
-
-    @Column
-    var eMail : String,
+    var eMail : String?,
 
     @Column
     var reportCount : Long=0,
