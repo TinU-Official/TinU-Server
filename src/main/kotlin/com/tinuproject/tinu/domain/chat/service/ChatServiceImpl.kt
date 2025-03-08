@@ -49,7 +49,9 @@ class ChatServiceImpl (
         return CreateChatResponse(chatId = chat.id)
     }
 
-    override fun getList(userId: UUID) : List<ChatListResponse> {
-        TODO("Not yet implemented")
+    override fun getList(userId : UUID, sortedType : String) : List<ChatListResponse> {
+        val member = memberRepository.findMemberByUserId(userId = userId) ?: throw NotFoundException()
+//        val chatList = chatRepository.findAllByBuyerId(userId = member.id) ?: chatRepository.findChatBySellerId(userId = member.id) ?: throw NotFoundException()
+        return List<ChatListResponse>(0) { ChatListResponse(0, 0, 0, 0) }
     }
 }
