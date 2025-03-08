@@ -24,7 +24,7 @@ class ChatRoomController (
     fun generateRoomInfo (
         httpServletResponse: HttpServletResponse,
         @AuthenticationPrincipal userId : UUID,
-        @RequestParam postId : Long
+        @RequestParam postId : Long? // TODO. null로 들어오는 것에 대한 예외 처리 필요
     ): ResponseEntity<ResponseDTO> {
         return ResponseEntityGenerator.onSuccess(chatService.createRoom(userId, postId))
     }
@@ -35,9 +35,9 @@ class ChatRoomController (
     fun retrieveRoomListInfo (
         httpServletResponse: HttpServletResponse,
         @AuthenticationPrincipal userId : UUID,
+        @RequestParam sortedType : String? // TODO. null로 들어오는 것에 대한 예외 처리 필요
     ): ResponseEntity<ResponseDTO> {
-
-        return ResponseEntityGenerator.onSuccess(chatService.getList(userId));
+        return ResponseEntityGenerator.onSuccess(chatService.getList(userId, sortedType));
 
     }
 }
