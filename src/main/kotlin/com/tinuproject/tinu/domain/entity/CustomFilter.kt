@@ -1,6 +1,7 @@
 package com.tinuproject.tinu.domain.entity
 
 
+import com.tinuproject.tinu.domain.customfilter.dto.client_controller.request.UpdateCustomFilter
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import jakarta.persistence.*
 
@@ -17,7 +18,7 @@ class CustomFilter (
     var minPrice :Int?,
 
     @Column
-    var isSell : Boolean?,
+    var onlySell : Boolean?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="member_id")
@@ -25,4 +26,12 @@ class CustomFilter (
 
     @OneToMany(mappedBy = "customFilter", cascade = [CascadeType.REMOVE], fetch = FetchType.LAZY)
     var customCategory: MutableList<CustomCategory> = mutableListOf()
-) : BaseEntity()
+) : BaseEntity(){
+
+    fun updateCustomFilter(updateCustomFilter: UpdateCustomFilter){
+        this.filterName = updateCustomFilter.filterName
+        this.onlySell = updateCustomFilter.onlySell
+        this.maxPrice = updateCustomFilter.maxPrice
+        this.minPrice = updateCustomFilter.minPrice
+    }
+}

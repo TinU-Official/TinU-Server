@@ -1,11 +1,11 @@
 package com.tinuproject.tinu.domain.member.repository
 
 import com.tinuproject.tinu.domain.entity.Member
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
-interface MemberRepository : CrudRepository<Member, Long> {
-    fun findMemberByeMail(eMail: String): Member?
+interface MemberRepository : JpaRepository<Member, Long> {
+    fun findMemberByEmail(email: String): Member?
 
     fun findMemberByUserId(userId: UUID) : Member?
 

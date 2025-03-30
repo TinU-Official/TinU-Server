@@ -1,22 +1,22 @@
 package com.tinuproject.tinu.domain.member.controller
 
 import com.tinuproject.tinu.DTO.ResponseDTO
-import com.tinuproject.tinu.domain.member.dto.client_controller.RegisterRequestDTO
+import com.tinuproject.tinu.domain.member.dto.client_controller.request.RegisterRequestDTO
 import com.tinuproject.tinu.web.email.dto.client_controller.EmailAuthRequestDTO
 import com.tinuproject.tinu.web.email.dto.client_controller.EmailCodeCheckRequestDTO
 import com.tinuproject.tinu.domain.member.service.MemberService
 import com.tinuproject.tinu.domain.member.service.RegisterService
+import com.tinuproject.tinu.web.NullResponse
 import com.tinuproject.tinu.web.ResponseEntityGenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
 
-@Controller
+@RestController
 @RequestMapping("/api/register")
 class RegisterController(
     val memberService: MemberService,
@@ -33,7 +33,7 @@ class RegisterController(
                 -> 있다면 이미 사용 중인 이메일이라는 결과 반환
      */
     @GetMapping("/email-check")
-    fun emailCheck(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "email") email : String) : ResponseEntity<ResponseDTO> {
+    fun emailCheck(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "email") email : String) : ResponseEntity<ResponseDTO<NullResponse?>> {
         registerService.checkEmailValidation(userId,email)
 
         return ResponseEntityGenerator.onSuccess()
@@ -50,7 +50,7 @@ class RegisterController(
      */
     //인증번호 요청
     @PostMapping("/email-auth")
-    fun emailCodeRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailAuthRequestDTO: EmailAuthRequestDTO) : ResponseEntity<ResponseDTO>{
+    fun emailCodeRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailAuthRequestDTO: EmailAuthRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         registerService.checkEmailValidation(userId,emailAuthRequestDTO.email)
 
         registerService.sendMail(userId,emailAuthRequestDTO)
@@ -68,7 +68,7 @@ class RegisterController(
      */
 
     @PutMapping(("/code-check"))
-    fun emailCodeCheckRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailCodeCheckRequestDTO: EmailCodeCheckRequestDTO) : ResponseEntity<ResponseDTO>{
+    fun emailCodeCheckRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailCodeCheckRequestDTO: EmailCodeCheckRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         registerService.checkCode(userId, emailCodeCheckRequestDTO)
         return ResponseEntityGenerator.onSuccess()
     }
@@ -81,14 +81,13 @@ class RegisterController(
             2. 가능하다면 가능하다는 응답 전송
      */
     @GetMapping("/nick-check")
-    fun nickNameCheckRequest(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "name") nickName :String) : ResponseEntity<ResponseDTO>{
-        memberService.usableMemberByNickName(userId,nickName)
+    fun nickNameCheckRequest(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "name") nickName :String) : ResponseEntity<ResponseDTO<NullResponse?>>{
+        memberService.usableMemberByNickname(userId,nickName)
         return ResponseEntityGenerator.onSuccess()
     }
 
     @PostMapping("/info-verify")
-    fun registerRequest(@AuthenticationPrincipal userId : UUID, @RequestBody registerRequestDTO : RegisterRequestDTO) : ResponseEntity<ResponseDTO>{
-        memberService.usableMemberByNickName(userId, registerRequestDTO.nickName)
+    fun registerRequest(@AuthenticationPrincipal userId : UUID, @RequestBody registerRequestDTO : RegisterRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         memberService.registerMember(userId = userId, registerRequestDTO = registerRequestDTO)
 
         return ResponseEntityGenerator.onSuccess()

@@ -1,7 +1,5 @@
 package com.tinuproject.tinu.web.email.util
 
-import com.tinuproject.tinu.domain.member.repository.MemberRepository
-import com.tinuproject.tinu.web.email.repository.EMailRepository
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
@@ -23,7 +21,7 @@ class MailManager(
         code = ((Math.random() * 90000).toInt() + 100000).toString() //(int) Math.random() * (최댓값-최소값+1) + 최소값
     }
 
-    override fun createMail(mail: String?): MimeMessage {
+    override fun createEmail(mail: String?): MimeMessage {
         createNumber()
         val message = javaMailSender.createMimeMessage()
         try {
@@ -42,7 +40,7 @@ class MailManager(
     }
 
     override fun sendMail(mail: String?): String {
-        val message: MimeMessage = createMail(mail)
+        val message: MimeMessage = createEmail(mail)
         javaMailSender.send(message)
         return code
     }

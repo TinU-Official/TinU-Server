@@ -2,6 +2,7 @@ package com.tinuproject.tinu.domain.entity
 
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import com.tinuproject.tinu.domain.enums.Social
+import com.tinuproject.tinu.domain.member.dto.client_controller.request.UpdateUserInfoRequestDTO
 import jakarta.persistence.*
 import java.util.*
 
@@ -31,7 +32,7 @@ class Member (
     var introduction : String?,
 
     @Column
-    var eMail : String?,
+    var email : String?,
 
     @Column
     var reportCount : Long=0,
@@ -73,4 +74,13 @@ class Member (
         cascade = [CascadeType.REMOVE],
         mappedBy = "member")
     var customFilter : MutableList<CustomFilter> = mutableListOf()
-) : BaseEntity()
+) : BaseEntity(){
+
+    fun updateMemberInfo(updateUserInfoRequestDTO: UpdateUserInfoRequestDTO){
+        this.nickname = updateUserInfoRequestDTO.nickname
+        this.grade = updateUserInfoRequestDTO.grade
+        this.major = updateUserInfoRequestDTO.major
+        this.introduction = updateUserInfoRequestDTO.introduction
+    }
+
+}

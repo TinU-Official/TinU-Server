@@ -1,5 +1,6 @@
 package com.tinuproject.tinu
 
+import com.tinuproject.tinu.DTO.ErrorResponse
 import com.tinuproject.tinu.DTO.ResponseDTO
 import com.tinuproject.tinu.domain.exception.base.BaseException
 import com.tinuproject.tinu.domain.exception.common.NotFoundException
@@ -14,12 +15,12 @@ import org.springframework.web.servlet.NoHandlerFoundException
 class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException::class)
-    fun baseException(e : BaseException) : ResponseEntity<ResponseDTO>{
+    fun baseException(e : BaseException) : ResponseEntity<ResponseDTO<ErrorResponse>>{
         return ResponseEntityGenerator.onFailure(e)
     }
 
     @ExceptionHandler(NoHandlerFoundException::class)
-    fun noHandlerFoundException(e : NoHandlerFoundException) : ResponseEntity<ResponseDTO>{
+    fun noHandlerFoundException(e : NoHandlerFoundException) : ResponseEntity<ResponseDTO<ErrorResponse>>{
         return ResponseEntityGenerator.onFailure(NotFoundException())
     }
 }

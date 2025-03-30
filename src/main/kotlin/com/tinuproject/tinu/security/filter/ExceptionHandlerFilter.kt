@@ -1,6 +1,7 @@
 package com.tinuproject.tinu.security.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.tinuproject.tinu.DTO.ErrorResponse
 import com.tinuproject.tinu.DTO.ResponseDTO
 import com.tinuproject.tinu.domain.exception.base.BaseException
 import com.tinuproject.tinu.web.ResponseEntityGenerator
@@ -39,7 +40,7 @@ class ExceptionHandlerFilter(
             response.status = e.getResponse().stateCode
             response.contentType = MediaType.APPLICATION_JSON_VALUE
             response.characterEncoding = "UTF-8"
-            val result : ResponseDTO? = ResponseEntityGenerator.onFailure(e).body
+            val result : ResponseDTO<ErrorResponse>? = ResponseEntityGenerator.onFailure(e).body
             try {
                 log.info(objectMapper.writeValueAsString(result))
                 response.writer.write(objectMapper.writeValueAsString(result))

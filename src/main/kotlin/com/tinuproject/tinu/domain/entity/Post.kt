@@ -3,6 +3,7 @@ package com.tinuproject.tinu.domain.entity
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import com.tinuproject.tinu.domain.enums.PaymentMethod
 import com.tinuproject.tinu.domain.enums.SellMethod
+import com.tinuproject.tinu.domain.post.dto.request.PostUpdateRequest
 import jakarta.persistence.*
 
 @Entity
@@ -53,7 +54,7 @@ class Post (
     var paymentMethod: Set<PaymentMethod> = setOf(),
 
     @Column
-    var thumbnailImageURL : String?,
+    var thumbnail : String?,
 
     @Column
     var reportCount : Long = 0,
@@ -62,7 +63,7 @@ class Post (
     var scrapCount : Long = 0,
 
     @OneToMany(fetch = FetchType.LAZY,
-        cascade = [CascadeType.ALL],
+        cascade = [CascadeType.REMOVE],
         orphanRemoval = true,
         mappedBy = "post")
     var multimedia : MutableList<Multimedia> = mutableListOf(),
@@ -77,4 +78,18 @@ class Post (
         cascade = [CascadeType.REMOVE],
         mappedBy = "post")
     var scrap: MutableList<Scrap> = mutableListOf()
-) : BaseEntity()
+) : BaseEntity() {
+    fun updatePost(
+            postUpdateRequest: PostUpdateRequest,
+            category: Category,
+            thumbnail: String?
+    ) {
+        this.title = postUpdateRequest.title
+        this.body = postUpdateRequest.body
+        this.category = category
+        this.price = postUpdateRequest.price
+        this.sellMethod = mutableSetOf(postUpdateRequest.sellMethod)
+        this.paymentMethod = mutableSetOf(postUpdateRequest.paymentMethod)
+        thumbnail?.let { this.thumbnail = it }
+    }
+}
