@@ -2,6 +2,7 @@ package com.tinuproject.tinu.domain.post.service
 
 import com.tinuproject.tinu.domain.category.repository.CategoryRepository
 import com.tinuproject.tinu.domain.entity.*
+import com.tinuproject.tinu.domain.exception.mail.NotExistMemberException
 import com.tinuproject.tinu.domain.exception.post.*
 import com.tinuproject.tinu.domain.exception.s3.UploadSizeOutOfRangeException
 import com.tinuproject.tinu.domain.exception.scrap.ScrapAlreadyExistException
@@ -12,9 +13,7 @@ import com.tinuproject.tinu.domain.multimedia.repository.MultimediaRepository
 import com.tinuproject.tinu.domain.post.dto.request.PostCreateRequest
 import com.tinuproject.tinu.domain.post.dto.request.PostDeleteRequest
 import com.tinuproject.tinu.domain.post.dto.request.PostUpdateRequest
-import com.tinuproject.tinu.domain.post.dto.response.PostCreateResponse
-import com.tinuproject.tinu.domain.post.dto.response.PostDetailResponse
-import com.tinuproject.tinu.domain.post.dto.response.PostsListResponse
+import com.tinuproject.tinu.domain.post.dto.response.*
 import com.tinuproject.tinu.domain.post.repository.*
 import com.tinuproject.tinu.domain.postHashTagMap.repository.PostHashTagMapRepository
 import com.tinuproject.tinu.domain.scrap.repository.ScrapRepository
@@ -52,10 +51,9 @@ class PostServiceImpl(
             onlySell: Boolean
     ): PostsListResponse {
         val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
+                ?: throw NotExistMemberException()
 
-        val university = member.university
-                ?: throw UniversityNotFoundException()
+        val university = member.university!!
 
         log.info("University ID: ${university.id}")
         log.info("Params: cursorId=$cursorId, keyword=$keyword, category=$category, minPrice=$minPrice, maxPrice=$maxPrice, onlySell=$onlySell")
@@ -78,8 +76,8 @@ class PostServiceImpl(
         }
 
         val posts = rawPosts.map { post ->
-            PostsListResponse.PostResponse(
-                    postId = post.id!!,
+            PostListBodyResponse(
+                    id = post.id!!,
                     createdAt = post.createdAt!!,
                     title = post.title,
                     price = post.price,
@@ -100,15 +98,12 @@ class PostServiceImpl(
     @Transactional(readOnly = true)
     override fun getPostDetail(userId: UUID, postId: Long): PostDetailResponse {
         val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        if (member.university == null)
-                throw UniversityNotFoundException()
+                ?: throw NotExistMemberException()
 
         val post = postRepository.findPostById(postId)
                 ?: throw PostNotFoundException()
 
-        if (member.university != post.university) {
+        if (member.university!!.id != post.university.id) {
             throw UniversityNotMatchException()
         }
 
@@ -133,10 +128,10 @@ class PostServiceImpl(
                 likeCount = post.scrapCount,
                 isWriter = member == post.author,
                 images = post.multimedia.map { it.url },
-                postHashTagMap = post.postHashTagMap.map {
-                    PostDetailResponse.HashTag(
-                            hashTagId = it.hashTag.id!!,
-                            hashTagName = it.hashTag.tagName
+                hashTags = post.postHashTagMap.map {
+                    PostHashTagResponse(
+                            id = it.hashTag.id!!,
+                            name = it.hashTag.tagName
                     )
                 }
         )
@@ -145,10 +140,7 @@ class PostServiceImpl(
     @Transactional
     override fun createPost(userId: UUID, postCreateRequest: PostCreateRequest): PostCreateResponse {
         val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        val university = member.university
-                ?: throw UniversityNotFoundException()
+                ?: throw NotExistMemberException()
 
         val category = categoryRepository.findCategoryById(postCreateRequest.categoryId)
                 ?: throw CategoryNotFoundException()
@@ -163,17 +155,17 @@ class PostServiceImpl(
         }
 
         val newPost = Post(
-                university = university,
+                university = member.university!!,
                 title = postCreateRequest.title,
                 body = postCreateRequest.body,
                 author = member,
                 buyer = null,
                 category = category,
                 price = postCreateRequest.price,
-                sellMethod = setOf(postCreateRequest.sellMethod),
+                sellMethod = postCreateRequest.sellMethod,
                 isSell = true,
                 isHide = false,
-                paymentMethod = setOf(postCreateRequest.paymentMethod),
+                paymentMethod = postCreateRequest.paymentMethod,
                 thumbnail = urlList.firstOrNull(),
                 reportCount = 0,
                 scrapCount = 0,
@@ -189,20 +181,13 @@ class PostServiceImpl(
         mappingMultimedia(newPost, urlList.toMutableList())
 
         log.info("해시태그맵 추가")
-        mappingPostHashTagMap(newPost, postCreateRequest.hashTag.toMutableList())
+        mappingPostHashTagMap(newPost, postCreateRequest.hashTags.toMutableList())
 
         return PostCreateResponse(postId = newPost.id!!)
     }
 
     @Transactional
     override fun updatePost(userId: UUID, postId: Long, postUpdateRequest: PostUpdateRequest) {
-
-        log.info("게시글 작성자 검증")
-        val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        if (member.university == null)
-                throw UniversityNotFoundException()
 
         log.info("게시글 검증")
         val post = postRepository.findPostById(postId)
@@ -234,7 +219,7 @@ class PostServiceImpl(
 
         log.info("해시태그맵 추가")
         postHashTagMapRepository.deleteAllByPostId(postId)
-        mappingPostHashTagMap(post, postUpdateRequest.hashTag.toMutableList())
+        mappingPostHashTagMap(post, postUpdateRequest.hashTags.toMutableList())
 
         log.info("게시글 업데이트")
         post.updatePost(postUpdateRequest, category, urlList.firstOrNull())
@@ -246,13 +231,6 @@ class PostServiceImpl(
 
     @Transactional
     override fun deletePost(userId: UUID, postDeleteRequest: PostDeleteRequest) {
-
-        log.info("게시글 작성자 검증")
-        val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        if (member.university == null)
-            throw UniversityNotFoundException()
 
         log.info("게시글 검증")
         val post = postRepository.findPostById(postDeleteRequest.postId)
@@ -304,12 +282,12 @@ class PostServiceImpl(
     @Transactional
     override fun createPostScrap(userId: UUID, postId: Long) {
         val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
+                ?: throw NotExistMemberException()
 
         val post = postRepository.findPostById(postId)
                 ?: throw PostNotFoundException()
 
-        if (member.university != post.university) {
+        if (member.university!!.id != post.university.id) {
             throw UniversityNotMatchException()
         }
 
@@ -324,7 +302,7 @@ class PostServiceImpl(
     @Transactional
     override fun deletePostScrap(userId: UUID, postId: Long) {
         val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
+                ?: throw NotExistMemberException()
 
         val scrap = scrapRepository.findScrapByMemberIdAndPostId(member.id!!, postId)
                 ?: throw ScrapNotFoundException()
@@ -336,12 +314,6 @@ class PostServiceImpl(
 
     @Transactional
     override fun updatePostStatus(userId: UUID, postId: Long, isSell: Boolean) {
-        log.info("게시글 작성자 검증")
-        val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        if (member.university == null)
-            throw UniversityNotFoundException()
 
         log.info("게시글 검증")
         val post = postRepository.findPostById(postId)
@@ -356,12 +328,6 @@ class PostServiceImpl(
 
     @Transactional
     override fun updatePostHide(userId: UUID, postId: Long, isHide: Boolean) {
-        log.info("게시글 작성자 검증")
-        val member = memberRepository.findMemberByUserId(userId)
-                ?: throw MemberNotFoundException()
-
-        if (member.university == null)
-            throw UniversityNotFoundException()
 
         log.info("게시글 검증")
         val post = postRepository.findPostById(postId)

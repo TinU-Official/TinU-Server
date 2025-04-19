@@ -3,6 +3,7 @@ package com.tinuproject.tinu.domain.entity
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import com.tinuproject.tinu.domain.enums.Social
 import com.tinuproject.tinu.domain.member.dto.client_controller.request.UpdateUserInfoRequestDTO
+import com.tinuproject.tinu.domain.member.dto.controller_service.input.UpdateUserInputDTO
 import jakarta.persistence.*
 import java.util.*
 
@@ -76,11 +77,12 @@ class Member (
     var customFilter : MutableList<CustomFilter> = mutableListOf()
 ) : BaseEntity(){
 
-    fun updateMemberInfo(updateUserInfoRequestDTO: UpdateUserInfoRequestDTO){
-        this.nickname = updateUserInfoRequestDTO.nickname
-        this.grade = updateUserInfoRequestDTO.grade
-        this.major = updateUserInfoRequestDTO.major
-        this.introduction = updateUserInfoRequestDTO.introduction
+    fun updateMemberInfo(updateUserInputDTO: UpdateUserInputDTO){
+        this.nickname = updateUserInputDTO.nickname
+        this.grade = updateUserInputDTO.grade
+        this.major = updateUserInputDTO.major
+        this.introduction = updateUserInputDTO.introduction
+        this.profileImageURL = updateUserInputDTO.profile
     }
 
 }

@@ -1,6 +1,7 @@
 package com.tinuproject.tinu.domain.exception.base
 
 import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.http.HttpStatus
 
 enum class ErrorCode(
     val httpStatusCode : Int,
@@ -16,6 +17,7 @@ enum class ErrorCode(
     MEMBER_EXIST_NICKNAME(httpStatusCode = 409, stateCode = "ALREADY_EXIST_NICKNAME", message = "이미 사용중인 닉네임입니다."),
     MEMBER_NOT_EXIST(httpStatusCode = 404, stateCode = "NOT_FOUND_MEMBER", message = "요청하신 이용자는 없는 이용자입니다."),
     MEMBER_EXIST(httpStatusCode = 409, stateCode = "ALREADY_EXIST_MEMBER", message = "이미 회원가입이 진행된 계정입니다."),
+    MEMBER_NEED_REGIST(httpStatusCode = HttpStatus.UNAUTHORIZED.value(), stateCode = "MEMBER_NEED_REGIST", message = "회원가입이 완료되지 않은 사용자입니다."),
 
     //회원가입 - 이메일 인증
     UNIVERSITY_NOT_EXIST_DOMAIN(httpStatusCode = 400, stateCode = "NOT_EXIST_DOMAIN", message = "현재 서비스를 지원하는 학교가 아닌 것 같습니다."),
@@ -24,10 +26,7 @@ enum class ErrorCode(
     NEED_EMAIL_AUTH(httpStatusCode = 400, stateCode = "NEED_EMAIL_AUTH", message = "이메일 인증이 필요합니다."),
 
     //판매글
-    MEMBER_NOT_FOUND(httpStatusCode = 403, stateCode = "MEMBER_NOT_FOUND", message = "회원 정보가 존재하지 않습니다."),
-    UNIVERSITY_NOT_FOUND(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_FOUND", message = "소속 대학이 존재하지 않습니다. 회원가입을 마무리 한 후 시도하세요."),
     POST_NOT_FOUND(httpStatusCode = 404, stateCode = "POST_NOT_FOUND", message = "게시글이 존재하지 않습니다."),
-    UNIVERSITY_NOT_MATCH(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_MATCH", message = "대학이 일치하지 않습니다."),
     POST_HIDDEN(httpStatusCode = 403, stateCode = "POST_HIDDEN", message = "숨김 처리된 게시글입니다."),
     CATEGORY_NOT_FOUND(httpStatusCode = 404, stateCode = "CATEGORY_NOT_FOUND", message = "카테고리가 존재하지 않습니다."),
     HASHTAG_NOT_FOUND(httpStatusCode = 404, stateCode = "HASHTAG_NOT_FOUND", message = "해시태그가 존재하지 않습니다."),
@@ -53,6 +52,7 @@ enum class ErrorCode(
     NOT_CREATED_CHAT_ID(httpStatusCode = 400, stateCode = "NOT_CREATED_CHAT_ID", message = "채팅방 생성에 실패했습니다. 다시 시도해주세요."),
 
     //전역적 사용
+    UNIVERSITY_NOT_MATCH(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_MATCH", message = "대학이 일치하지 않습니다."),
     NOT_FOUND(httpStatusCode = 404, stateCode = "NOT_FOUND", message = "없는 페이지입니다."),
     UNAUTHORIZED_ACCESS(httpStatusCode = 403, stateCode = "FORBIDDEN", message = "요청에 대한 권한이 없습니다.");
 }

@@ -1,12 +1,16 @@
 package com.tinuproject.tinu.domain.token.refreshtoken.controller
 
 import com.tinuproject.tinu.DTO.ResponseDTO
+import com.tinuproject.tinu.domain.exception.token.ExpiredTokenException
+import com.tinuproject.tinu.domain.exception.token.InvalidedTokenException
 import com.tinuproject.tinu.domain.exception.token.NotFoundTokenException
 import com.tinuproject.tinu.domain.token.Tokens
 import com.tinuproject.tinu.domain.token.refreshtoken.service.RefreshTokenService
+import com.tinuproject.tinu.swagger.annotation.SwaggerExceptionResponses
 import com.tinuproject.tinu.web.CookieGenerator
 import com.tinuproject.tinu.web.NullResponse
 import com.tinuproject.tinu.web.ResponseEntityGenerator
+import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +34,8 @@ class RefreshTokenController(
 
 
     @GetMapping("/refresh")
+    @SwaggerExceptionResponses(exceptions = [NotFoundTokenException::class, InvalidedTokenException::class, ExpiredTokenException::class, ])
+    @Operation(summary = "AccessToken 재발급 API", description = "RefreshToken을 통해 AccessToken을 재발급 받는 로직입니다.")
     fun refreshAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "RefreshToken") refreshToken : String?): ResponseEntity<ResponseDTO<NullResponse?>> {
         log.info("AccessToken 갱신 시도")
 

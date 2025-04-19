@@ -1,21 +1,12 @@
 package com.tinuproject.tinu.domain.post.dto.response
 
-import java.time.LocalDateTime
+import io.swagger.v3.oas.annotations.media.Schema
 
-
+@Schema(description = "게시글 리스트 응답")
 data class PostsListResponse (
-        val posts: List<PostResponse>,
+        val posts: List<PostListBodyResponse>,
+        @Schema(description = "게시글 수", defaultValue = "10")
         val size: Int,
+        @Schema(description = "다음 커서 ID", defaultValue = "17")
         val nextCursorId: String
-) {
-    data class PostResponse (
-            val postId: Long?,
-            val createdAt: LocalDateTime?,
-            val title: String,
-            val price: Int,
-            val thumbnail: String?,
-            val isLike: Boolean,
-            val likeCount: Long,
-            val isSell: Boolean
-    )
-}
+)

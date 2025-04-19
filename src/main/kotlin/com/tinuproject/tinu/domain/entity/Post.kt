@@ -88,8 +88,8 @@ class Post (
         this.body = postUpdateRequest.body
         this.category = category
         this.price = postUpdateRequest.price
-        this.sellMethod = mutableSetOf(postUpdateRequest.sellMethod)
-        this.paymentMethod = mutableSetOf(postUpdateRequest.paymentMethod)
+        this.sellMethod = postUpdateRequest.sellMethod
+        this.paymentMethod = postUpdateRequest.paymentMethod
         thumbnail?.let { this.thumbnail = it }
     }
 }

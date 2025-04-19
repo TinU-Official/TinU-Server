@@ -10,9 +10,11 @@ import com.tinuproject.tinu.domain.exception.university.NotExistDomainException
 import com.tinuproject.tinu.domain.member.dto.client_controller.request.RegisterRequestDTO
 import com.tinuproject.tinu.domain.member.dto.client_controller.request.UpdateUserInfoRequestDTO
 import com.tinuproject.tinu.domain.member.dto.client_controller.response.MemberSearchResponseDTO
+import com.tinuproject.tinu.domain.member.dto.controller_service.input.UpdateUserInputDTO
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
 import com.tinuproject.tinu.domain.socialmember.repository.SocialMemberRepository
 import com.tinuproject.tinu.domain.university.repository.UniversityRepository
+import com.tinuproject.tinu.s3.service.S3Service
 import com.tinuproject.tinu.web.email.entity.EmailAuth
 import com.tinuproject.tinu.web.email.repository.EmailRepository
 import org.slf4j.Logger
@@ -26,7 +28,8 @@ class MemberServiceImpl(
     val memberRepository: MemberRepository,
     val universityRepository: UniversityRepository,
     val emailAuthRepository: EmailRepository,
-    val socialMemberRepository: SocialMemberRepository
+    val socialMemberRepository: SocialMemberRepository,
+    val s3Service: S3Service
 ):MemberService {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -45,14 +48,26 @@ class MemberServiceImpl(
 
         university ?: throw NotExistDomainException()
 
+        
+        //회원 가입시 기본 url은 Null로
+        var url : String? = null
+        
+        //만약 이미지 입력이 있다면 해당 url을 입력
+        registerRequestDTO.profile?.let { url = s3Service.verifyImage(it) }
+
+        //TINU-151 추가 만약 회원가입시 작성한 과가 없다면 자동으로 중고거래학과로 지정.
+        var major = "중고거래학과"
+
+        registerRequestDTO.major?.let { major = it }
+
         val socialMember = socialMemberRepository.findByUserId(userId)
         val newMember = Member(
             userId = userId,
             university = university,
             nickname = registerRequestDTO.nickName,
-            major = registerRequestDTO.major,
+            major = major,
             grade = registerRequestDTO.grade,
-            profileImageURL = registerRequestDTO.profileImageURL,
+            profileImageURL = url,
             introduction = registerRequestDTO.introduction,
             email = registerRequestDTO.email,
             mark = 0.0,
@@ -102,13 +117,24 @@ class MemberServiceImpl(
 
     @Transactional
     override fun updateMember(userId: UUID, updateUserInfoRequestDTO: UpdateUserInfoRequestDTO) {
+
+        //update를 하면서 사용할 수 있는 닉네임인지 조회.
+        usableMemberByNickname(userId, updateUserInfoRequestDTO.nickname)
+
         val member = memberRepository.findMemberByUserId(userId)
 
+
+        //업데이트하려는 멤버가 없으면 Exception 발생.
         member?: throw NotExistMemberException()
 
-        usableMemberByNickname(userId = userId, nickName = updateUserInfoRequestDTO.nickname)
+        //우선 멤버의 기존 이미지 url을 저장해두었다가
+        var url = member.profileImageURL
 
-        member.updateMemberInfo(updateUserInfoRequestDTO)
+        //새로 업데이트 하는 profile 사진 정보가 있다면 이를 갱신
+        updateUserInfoRequestDTO.profile?.let { url = s3Service.verifyImage(it) }
+
+        //그후 member의 값을 변경해줌.
+        member.updateMemberInfo(UpdateUserInputDTO(updateUserInfoRequestDTO, url))
 
         memberRepository.save(member)
 

@@ -29,15 +29,27 @@ class RegisterServiceImpl(
 
     @Transactional(readOnly = true)
     override fun checkEmailValidation(userId: UUID, email: String): Boolean {
+
+        //Email의 domain을 추출 (ex kyonggi.ac.kr)
         val domain = email.split("@")[1]
 
+        //해당 도메인이 우리 서비스에서 관리하는 대학 도메인인지 확인
         val university = universityRepository.findByDomain(domain)
 
+        //없는 대학이라면 관리하지 않는 도메인 예외 발생
         university?: throw NotExistDomainException()
 
-        val member = memberRepository.findMemberByUserId(userId)
+        //해당 멤버가 이미 회원가입을 진행했는지 확인하기위해 유저 조회
+        var member = memberRepository.findMemberByUserId(userId)
 
+        //조회된 유저가 있다면 이미 회원가입을 완료한 회원임을 알리는 예외 발생
         if(member!=null){ throw ExistMemberException()}
+
+        //TINU-151 추가 로직(이메일 사용 가능 여부 확인 시 해당 이메일로 인증을 받은 사람이 있는지 검증하지 않았었어서 이를 추가.
+        member = memberRepository.findMemberByEmail(email)
+
+        //TINU-151 사용 중인 이메일이라면 이미 사용중인 이메일임을 알리는 예외 발생
+        if(member!=null){ throw ExistEmailException()}
 
         return true
     }

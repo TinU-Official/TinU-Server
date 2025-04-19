@@ -84,6 +84,8 @@ jobs:
           spring.mail.username=${{ secrets.MAIL_USERNAME }}
           spring.mail.password=${{ secrets.MAIL_PASSWORD }}
           jwt.redirect.sign = ${{ secrets.JWT_REDIRECT_SIGN_URI }}
+          springdoc.default-produces-media-type=application/json
+          springdoc.default-consumes-media-type=application/json
           EOF
 
       # docker image 빌드
