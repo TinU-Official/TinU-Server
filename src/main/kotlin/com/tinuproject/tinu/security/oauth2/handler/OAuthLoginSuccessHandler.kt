@@ -79,7 +79,8 @@ class OAuthLoginSuccessHandler(
         }else{
             String.format(SIGN_REDIRECT_URL)
         }
-
+//        log.info("accessToken : $accessToken")
+//        log.info("refreshToken : $refreshToken")
         response?.addHeader(HttpHeaders.AUTHORIZATION,("Bearer $accessToken").toString())
         response?.addHeader(HttpHeaders.SET_COOKIE,CookieGenerator.createCookies("RefreshToken", refreshToken))
         response?.sendRedirect(redirectUri)

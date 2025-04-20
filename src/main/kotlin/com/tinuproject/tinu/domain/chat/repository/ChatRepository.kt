@@ -5,7 +5,9 @@ import com.tinuproject.tinu.domain.entity.SocialMember
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 
-interface ChatRepository : JpaRepository<Chat, Long> {
+interface ChatRepository : JpaRepository<Chat, Long>, ChatSupportRepository {
+
+    fun findByPostIdAndBuyerId(postId: Long, buyerId: Long): Chat?
 
     fun findChatByBuyerId(userId : Long) : Chat?
     fun findChatBySellerId(userId : Long) : Chat?

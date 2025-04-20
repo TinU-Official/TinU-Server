@@ -1,6 +1,5 @@
 package com.tinuproject.tinu.domain.entity
 
-import com.tinuproject.tinu.domain.chat.dto.ChatDTO
 import com.tinuproject.tinu.domain.entity.base.BaseEntity
 import jakarta.persistence.*
 
