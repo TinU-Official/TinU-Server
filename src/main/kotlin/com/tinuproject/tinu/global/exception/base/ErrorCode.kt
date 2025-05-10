@@ -11,7 +11,6 @@ enum class ErrorCode(
     TOKEN_INVALIDED(httpStatusCode = 401, stateCode = "TOKEN_INVALIDED", message = "토큰이 유효하지 않습니다."),
     TOKEN_EXPIRED(httpStatusCode = 401, stateCode = "TOKEN_EXPIRED", message = "토큰이 만료되었습니다."),
 
-
     //멤버 관련
     MEMBER_EXIST_EMAIL(httpStatusCode = 409, stateCode="ALREADY_EXIST_EMAIL", message = "이미 사용중인 이메일입니다."),
     MEMBER_EXIST_NICKNAME(httpStatusCode = 409, stateCode = "ALREADY_EXIST_NICKNAME", message = "이미 사용중인 닉네임입니다."),
@@ -45,6 +44,11 @@ enum class ErrorCode(
     FILE_LENGTH_OUT_OF_RANGE(httpStatusCode = 400, stateCode = "FILE_LENGTH_OUT_OF_RANGE", message = "파일 크기 범위를 벗어났습니다."),
     NO_SUCH_KEY(httpStatusCode = 400, stateCode = "NO_SUCH_KEY", message = "키가 존재하지 않습니다."),
     INVALID_ETAG(httpStatusCode = 400, stateCode = "INVALID_ETAG", message = "ETag가 일치하지 않습니다."),
+
+    //채팅 관련
+    ALREADY_EXIST_CHAT(httpStatusCode = 400, stateCode = "ALREADY_EXIST_CHAT", message = "채팅방이 이미 존재합니다. 새로 생성할 수 없습니다."),
+    NOT_AUTHORITY_FOR_CREATE_CHAT(httpStatusCode = 400, stateCode = "NOT_AUTHORITY_FOR_CREATE_CHAT", message = "채팅방을 만들 권한이 없습니다."),
+    NOT_CREATED_CHAT_ID(httpStatusCode = 400, stateCode = "NOT_CREATED_CHAT_ID", message = "채팅방 생성에 실패했습니다. 다시 시도해주세요."),
 
     //전역적 사용
     UNIVERSITY_NOT_MATCH(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_MATCH", message = "대학이 일치하지 않습니다."),

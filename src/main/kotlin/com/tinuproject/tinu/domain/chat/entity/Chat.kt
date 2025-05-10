@@ -24,4 +24,13 @@ class Chat (
         cascade = [CascadeType.REMOVE],
         mappedBy = "chat")
     var chatList : MutableList<ChatText> = mutableListOf()
-) : BaseEntity()
+) : BaseEntity() {
+//        fun create(dto: ChatDTO, buyer: Member, seller: Member, post: Post): Chat {
+//            return Chat(
+//                buyer = buyer,
+//                seller = seller,
+//                post = post
+//            )
+//        }
+//    }
+}
