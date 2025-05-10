@@ -1,7 +1,7 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
-import com.tinuproject.tinu.domain.chat.dto.response.CreateChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatResponse
 import java.util.*
 
 interface ChatService {

@@ -1,16 +1,15 @@
 package com.tinuproject.tinu.domain.chat.controller
 
-import com.tinuproject.tinu.DTO.ResponseDTO
-import com.tinuproject.tinu.domain.chat.dto.response.CreateChatResponse
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
 import com.tinuproject.tinu.domain.chat.service.ChatService
-import com.tinuproject.tinu.domain.exception.chat.AlreadyExistChatException
-import com.tinuproject.tinu.domain.exception.chat.NotAuthorityCreateChatException
-import com.tinuproject.tinu.swagger.annotation.SwaggerExceptionResponses
-import com.tinuproject.tinu.web.ResponseEntityGenerator
+import com.tinuproject.tinu.domain.chat.exception.AlreadyExistChatException
+import com.tinuproject.tinu.domain.chat.exception.NotAuthorityCreateChatException
+import com.tinuproject.tinu.global.response.ResponseEntityGenerator
+import com.tinuproject.tinu.global.response.dto.ResponseDTO
+import com.tinuproject.tinu.infra.swagger.annotation.SwaggerExceptionResponses
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*

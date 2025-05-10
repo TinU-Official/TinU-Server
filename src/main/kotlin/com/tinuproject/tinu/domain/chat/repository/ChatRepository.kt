@@ -1,7 +1,7 @@
 package com.tinuproject.tinu.domain.chat.repository
 
-import com.tinuproject.tinu.domain.entity.Chat
-import com.tinuproject.tinu.domain.entity.SocialMember
+import com.tinuproject.tinu.domain.chat.entity.Chat
+import com.tinuproject.tinu.domain.member.entity.SocialMember
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 

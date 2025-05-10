@@ -1,17 +1,15 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
-import com.tinuproject.tinu.domain.chat.dto.response.CreateChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatResponse
 import com.tinuproject.tinu.domain.chat.repository.ChatRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
-import com.tinuproject.tinu.domain.entity.Chat
-import com.tinuproject.tinu.domain.exception.chat.AlreadyExistChatException
-import com.tinuproject.tinu.domain.exception.chat.NotAuthorityCreateChatException
-import com.tinuproject.tinu.domain.exception.chat.NotCreatedChatException
-import com.tinuproject.tinu.domain.exception.common.NotFoundException
-import com.tinuproject.tinu.domain.exception.mail.NotExistMemberException
-import com.tinuproject.tinu.domain.exception.post.PostNotFoundException
+import com.tinuproject.tinu.domain.chat.entity.Chat
+import com.tinuproject.tinu.domain.chat.exception.AlreadyExistChatException
+import com.tinuproject.tinu.domain.chat.exception.NotAuthorityCreateChatException
+import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
+import com.tinuproject.tinu.domain.post.exception.PostNotFoundException
 import com.tinuproject.tinu.domain.post.repository.PostRepository
 import jakarta.transaction.Transactional
 import org.slf4j.Logger

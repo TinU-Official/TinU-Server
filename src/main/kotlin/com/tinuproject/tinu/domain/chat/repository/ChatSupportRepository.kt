@@ -1,5 +1,5 @@
 package com.tinuproject.tinu.domain.chat.repository
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
 import java.util.*
 
 interface ChatSupportRepository {

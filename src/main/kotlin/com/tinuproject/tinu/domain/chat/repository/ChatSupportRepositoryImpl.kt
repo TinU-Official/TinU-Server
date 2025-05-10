@@ -1,10 +1,10 @@
 package com.tinuproject.tinu.domain.chat.repository
 
 import com.querydsl.jpa.impl.JPAQueryFactory
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
-import com.tinuproject.tinu.domain.entity.QChat.chat
-import com.tinuproject.tinu.domain.entity.QChatText.chatText
-import com.tinuproject.tinu.domain.entity.QPost.post
+import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.entity.QChat.chat
+import com.tinuproject.tinu.domain.chat.entity.QChatText.chatText
+import com.tinuproject.tinu.domain.post.entity.QPost.post
 import java.util.*
 import java.time.LocalDateTime
 import org.springframework.stereotype.Repository

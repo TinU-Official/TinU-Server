@@ -1,6 +1,6 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.dto.response.ChatMessage
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatMessage
 
 interface ChatMessageService {
 
