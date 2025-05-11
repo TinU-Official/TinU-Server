@@ -2,7 +2,7 @@ package com.tinuproject.tinu.domain.chat.controller.dto.response
 
 import java.time.LocalDateTime
 
-data class GetListChatResponse(
+data class ChatListGetResponseDto(
     val id: Long,
     val thumbnail : String?,
     val buyerId: Long,

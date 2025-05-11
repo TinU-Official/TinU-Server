@@ -25,12 +25,4 @@ class Chat (
         mappedBy = "chat")
     var chatList : MutableList<ChatText> = mutableListOf()
 ) : BaseEntity() {
-//        fun create(dto: ChatDTO, buyer: Member, seller: Member, post: Post): Chat {
-//            return Chat(
-//                buyer = buyer,
-//                seller = seller,
-//                post = post
-//            )
-//        }
-//    }
 }

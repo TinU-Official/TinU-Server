@@ -1,5 +1,5 @@
 package com.tinuproject.tinu.domain.chat.controller.dto.response
 
-data class CreateChatResponse(
+data class ChatRoomCreateResponseDto(
     val chatId : Long?
 )

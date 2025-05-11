@@ -1,17 +1,17 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
-import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomCreateResponseDto
 import com.tinuproject.tinu.domain.chat.repository.ChatRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.chat.entity.Chat
 import com.tinuproject.tinu.domain.chat.exception.AlreadyExistChatException
 import com.tinuproject.tinu.domain.chat.exception.NotAuthorityCreateChatException
+import com.tinuproject.tinu.domain.chat.service.dto.output.ChatListGetOutputDto
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
 import com.tinuproject.tinu.domain.post.exception.PostNotFoundException
 import com.tinuproject.tinu.domain.post.repository.PostRepository
-import jakarta.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -28,7 +28,7 @@ class ChatServiceImpl (
     val log : Logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
-    override fun createRoom(userId: UUID, postId : Long) : CreateChatResponse {
+    override fun createChatRoom(userId: UUID, postId : Long) : ChatRoomCreateResponseDto {
         val buyer = memberRepository.findMemberByUserId(userId = userId) ?: throw NotExistMemberException();
         val post = postRepository.findPostById(id = postId) ?: throw PostNotFoundException()
         val chatList = chatRepository.findByPostIdAndBuyerId(postId = postId, buyerId = buyer.id!!)
@@ -39,11 +39,13 @@ class ChatServiceImpl (
         if(chatList != null) throw AlreadyExistChatException()
 
         val chat = chatRepository.save(Chat(buyer = buyer, seller = post.author, post = post))
-        return CreateChatResponse(chatId = chat.id)
+        return ChatRoomCreateResponseDto(chatId = chat.id)
     }
 
-    override fun getList(userId : UUID, sortedType : String) : List<GetListChatResponse> {
+    @Transactional(readOnly = true)
+    override fun getChatList(userId : UUID, sortedType : String) : List<ChatListGetOutputDto> {
         val member = memberRepository.findMemberByUserId(userId = userId) ?: throw NotExistMemberException()
-        return chatRepository.findChatListByUserIdAndType(member.id!!, sortedType)
+        val chatListResponses = chatRepository.findChatListByUserIdAndType(member.id!!, sortedType)
+        return chatListResponses
     }
 }

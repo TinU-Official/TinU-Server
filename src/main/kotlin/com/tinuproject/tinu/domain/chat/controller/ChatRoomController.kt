@@ -1,10 +1,11 @@
 package com.tinuproject.tinu.domain.chat.controller
 
-import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatResponse
-import com.tinuproject.tinu.domain.chat.controller.dto.response.GetListChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomCreateResponseDto
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatListGetResponseDto
 import com.tinuproject.tinu.domain.chat.service.ChatService
 import com.tinuproject.tinu.domain.chat.exception.AlreadyExistChatException
 import com.tinuproject.tinu.domain.chat.exception.NotAuthorityCreateChatException
+import com.tinuproject.tinu.domain.chat.mapper.ChatListMapper
 import com.tinuproject.tinu.global.response.ResponseEntityGenerator
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import com.tinuproject.tinu.infra.swagger.annotation.SwaggerExceptionResponses
@@ -19,10 +20,11 @@ import java.util.*
 @RequestMapping("/api/chat")
 @Tag(name = "채팅방 api", description = "웹소켓을 사용하지 않는 채팅방 CRUD api 입니다.")
 class ChatRoomController (
-    private val chatService: ChatService
+    private val chatService: ChatService,
+    private val chatListMapper: ChatListMapper
 ) {
 
-    //POST METHOD(/api/chat/create) : 채팅방 생성
+    //POST METHOD
     @PostMapping("/create")
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")
     @SwaggerExceptionResponses(
@@ -33,18 +35,21 @@ class ChatRoomController (
     )
     fun generateRoomInfo (
         @AuthenticationPrincipal userId : UUID,
-        @RequestParam postId : Long // TODO. null로 들어오는 것에 대한 예외 처리 필요
-    ): ResponseEntity<ResponseDTO<CreateChatResponse?>> {
-        return ResponseEntityGenerator.onSuccess(chatService.createRoom(userId, postId))
+        @RequestParam postId : Long
+    ): ResponseEntity<ResponseDTO<ChatRoomCreateResponseDto?>> {
+        return ResponseEntityGenerator.onSuccess(chatService.createChatRoom(userId, postId))
     }
 
-    //GET METHOD(/api/chat/list) : 채팅방 목록 조회
+    //GET METHOD
     @GetMapping("/list")
+    @Operation(summary = "채팅방 목록 조회", description = "채팅방 목록을 조회합니다.")
+    @SwaggerExceptionResponses()
     fun getChatList (
         @AuthenticationPrincipal userId : UUID,
-        @RequestParam sortedType : String // TODO. null로 들어오는 것에 대한 예외 처리 필요
-    ): ResponseEntity<ResponseDTO<List<GetListChatResponse>?>> {
-        return ResponseEntityGenerator.onSuccess(chatService.getList(userId, sortedType));
+        @RequestParam sortedType : String
+    ): ResponseEntity<ResponseDTO<List<ChatListGetResponseDto>?>> {
+        val responses = chatListMapper.toChatListGetResponseDto(chatService.getChatList(userId, sortedType))
+        return ResponseEntityGenerator.onSuccess(responses);
 
     }
 
