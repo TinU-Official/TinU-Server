@@ -82,6 +82,10 @@ dependencies {
 	//coroutine 관련 의존성 추가
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1'
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.1'
+
+	//mapstruct(객체 매핑) 관련 의존성 추가
+	implementation("org.mapstruct:mapstruct:1.5.5.Final")
+	kapt("org.mapstruct:mapstruct-processor:1.5.5.Final")
 }
 
 // Querydsl 설정부

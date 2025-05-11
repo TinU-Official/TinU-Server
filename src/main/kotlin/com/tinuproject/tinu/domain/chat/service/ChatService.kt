@@ -1,14 +1,14 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.dto.response.GetListChatResponse
-import com.tinuproject.tinu.domain.chat.dto.response.CreateChatResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomCreateResponseDto
+import com.tinuproject.tinu.domain.chat.service.dto.output.ChatListGetOutputDto
 import java.util.*
 
 interface ChatService {
 
-    fun createRoom(userId : UUID, postId : Long) : CreateChatResponse
+    fun createChatRoom(userId : UUID, postId : Long) : ChatRoomCreateResponseDto
 
-    fun getList(userId : UUID, sortedType : String) : List<GetListChatResponse>
+    fun getChatList(userId : UUID, sortedType : String) : List<ChatListGetOutputDto>
 
 //    fun getChatDetail(userId: UUID, chatId: Long): GetListChatResponse
 }
