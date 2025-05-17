@@ -1,6 +1,7 @@
 package com.tinuproject.tinu.domain.chat.service
 
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomCreateResponseDto
+import com.tinuproject.tinu.domain.chat.service.dto.output.ChatDetailGetOutputDto
 import com.tinuproject.tinu.domain.chat.service.dto.output.ChatListGetOutputDto
 import java.util.*
 
@@ -10,5 +11,5 @@ interface ChatService {
 
     fun getChatList(userId : UUID, sortedType : String) : List<ChatListGetOutputDto>
 
-//    fun getChatDetail(userId: UUID, chatId: Long): GetListChatResponse
+    fun getChatDetail(userId: UUID, chatId: Long): ChatDetailGetOutputDto
 }

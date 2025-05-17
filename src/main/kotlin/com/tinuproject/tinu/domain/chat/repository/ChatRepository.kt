@@ -8,6 +8,7 @@ import java.util.*
 interface ChatRepository : JpaRepository<Chat, Long>, ChatSupportRepository {
 
     fun findByPostIdAndBuyerId(postId: Long, buyerId: Long): Chat?
+    fun findChatById(chatId: Long): Chat?
 
     fun findChatByBuyerId(userId : Long) : Chat?
     fun findChatBySellerId(userId : Long) : Chat?
