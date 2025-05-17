@@ -1,4 +1,4 @@
-package com.tinuproject.tinu.domain.chat.dto.response
+package com.tinuproject.tinu.domain.chat.controller.dto.response
 
 import com.tinuproject.tinu.domain.chat.enum.MessageType
 import java.time.LocalDateTime

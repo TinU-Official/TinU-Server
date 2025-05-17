@@ -46,6 +46,13 @@ enum class ErrorCode(
     NO_SUCH_KEY(httpStatusCode = 400, stateCode = "NO_SUCH_KEY", message = "키가 존재하지 않습니다."),
     INVALID_ETAG(httpStatusCode = 400, stateCode = "INVALID_ETAG", message = "ETag가 일치하지 않습니다."),
 
+    //채팅 관련
+    ALREADY_EXIST_CHAT(httpStatusCode = 409, stateCode = "ALREADY_EXIST_CHAT", message = "채팅방이 이미 존재합니다. 새로 생성할 수 없습니다."),
+    NOT_AUTHORITY_FOR_CREATE_CHAT(httpStatusCode = 403, stateCode = "NOT_AUTHORITY_FOR_CREATE_CHAT", message = "채팅방을 만들 권한이 없습니다."),
+    NOT_CREATED_CHAT_ID(httpStatusCode = 500, stateCode = "NOT_CREATED_CHAT_ID", message = "채팅방 생성에 실패했습니다. 다시 시도해주세요."),
+    NOT_AUTHORITY_FOR_DELETE_CHAT(httpStatusCode = 403, stateCode = "NOT_AUTHORITY_FOR_DELETE_CHAT", message = "채팅방을 삭제할 권한이 없습니다."),
+    NOT_FOUND_CHAT(httpStatusCode = 404, stateCode = "NOT_FOUND_CHAT", message = "존재하지 않는 채팅방입니다."),
+
     //전역적 사용
     UNIVERSITY_NOT_MATCH(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_MATCH", message = "대학이 일치하지 않습니다."),
     NOT_FOUND(httpStatusCode = 404, stateCode = "NOT_FOUND", message = "없는 페이지입니다."),

@@ -1,9 +1,10 @@
-package com.tinuproject.tinu.domain.chat.service.dto.output
+package com.tinuproject.tinu.domain.chat.controller.dto.response
+
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 @Schema(description = "채팅 리스트 조회 응답 DTO")
-data class ChatListGetOutputDto(
+data class ChatListGetResponseDto(
     @Schema(description = "채팅방 ID", example = "1")
     val id: Long,
     @Schema(description = "판매 상품 썸네일", example = "thumbnail.jpg")

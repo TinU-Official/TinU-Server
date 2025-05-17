@@ -1,11 +1,14 @@
 package com.tinuproject.tinu.domain.chat.service
 
+import com.tinuproject.tinu.domain.chat.controller.dto.ChatMessageGroupDto
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailMessageResponseDto
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomCreateResponseDto
 import com.tinuproject.tinu.domain.chat.repository.ChatRepository
-import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.chat.entity.Chat
 import com.tinuproject.tinu.domain.chat.exception.AlreadyExistChatException
 import com.tinuproject.tinu.domain.chat.exception.NotAuthorityCreateChatException
+import com.tinuproject.tinu.domain.chat.exception.NotFoundChatException
+import com.tinuproject.tinu.domain.chat.service.dto.output.ChatDetailGetOutputDto
 import com.tinuproject.tinu.domain.chat.service.dto.output.ChatListGetOutputDto
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
@@ -21,7 +24,6 @@ import java.util.UUID
 class ChatServiceImpl (
     val memberRepository : MemberRepository,
     val chatRepository: ChatRepository,
-    val chatTextRepository: ChatTextRepository,
     val postRepository: PostRepository
 ) : ChatService
 {
@@ -38,7 +40,7 @@ class ChatServiceImpl (
         //condition 2 : 채팅방 생성을 시도하는 구매자가 이미 해당 판매 게시글에 대해 채팅방을 생성한 경우 필터링
         if(chatList != null) throw AlreadyExistChatException()
 
-        val chat = chatRepository.save(Chat(buyer = buyer, seller = post.author, post = post))
+        val chat = chatRepository.save(Chat(buyer = buyer, seller = post.author, isDeleted = false, post = post))
         return ChatRoomCreateResponseDto(chatId = chat.id)
     }
 
@@ -47,5 +49,37 @@ class ChatServiceImpl (
         val member = memberRepository.findMemberByUserId(userId = userId) ?: throw NotExistMemberException()
         val chatListResponses = chatRepository.findChatListByUserIdAndType(member.id!!, sortedType)
         return chatListResponses
+    }
+
+    @Transactional(readOnly = true)
+    override fun getChatDetail(userId: UUID, chatId: Long): ChatDetailGetOutputDto {
+        val chat = chatRepository.findChatById(chatId) ?: throw NotFoundChatException()
+
+        val chatTexts = chat.chatList
+
+        val grouped = chatTexts.groupBy { it.createdAt!!.toLocalDate() }
+
+        val messageGroups = grouped.map { (date, texts) ->
+            ChatMessageGroupDto(
+                date = date!!,
+                messages = texts.map { chatText ->
+                    ChatDetailMessageResponseDto(
+                        type = chatText.type,
+                        content = chatText.text,
+                        sender = chatText.writer.id!!,
+                        senderName = chatText.writer.nickname!!, // 실제 닉네임 필드명에 맞게 수정
+                        timestamp = chatText.createdAt!!
+                    )
+                }
+            )
+        }.sortedBy { it.date }
+
+        return ChatDetailGetOutputDto(
+            chatId = chat.id!!,
+            buyerId = chat.buyer.id!!,
+            sellerId = chat.seller.id!!,
+            postId = chat.post.id!!,
+            messages = messageGroups
+        )
     }
 }

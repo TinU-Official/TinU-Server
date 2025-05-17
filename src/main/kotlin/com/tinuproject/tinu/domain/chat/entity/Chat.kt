@@ -18,8 +18,10 @@ class Chat (
     @JoinColumn(name="post_id")
     var post : Post,
 
+    @Column
+    var isDeleted : Boolean,
+
     @OneToMany(fetch = FetchType.LAZY,
-        cascade = [CascadeType.REMOVE],
         mappedBy = "chat")
     var chatList : MutableList<ChatText> = mutableListOf()
 ) : BaseEntity() {
