@@ -30,8 +30,8 @@ class ChatRoomController (
     @Operation(summary = "채팅방 생성", description = "채팅방을 생성합니다.")
     @SwaggerExceptionResponses(
         exceptions = [
-        AlreadyExistChatException::class, // 채팅방이 이미 존재하는 경우(구매자가 동일 판매글에 채팅방 재생성 시도시)
-        NotAuthorityCreateChatException::class // 채팅방을 생성할 권한이 없는 경우(판매자 == 판매글 작성자인 경우)
+            AlreadyExistChatException::class, // 채팅방이 이미 존재하는 경우(구매자가 동일 판매글에 채팅방 재생성 시도시)
+            NotAuthorityCreateChatException::class // 채팅방을 생성할 권한이 없는 경우(판매자 == 판매글 작성자인 경우)
         ]
     )
     fun generateRoomInfo (

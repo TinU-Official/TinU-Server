@@ -32,7 +32,7 @@ class ChatServiceImpl (
     @Transactional
     override fun createChatRoom(userId: UUID, postId : Long) : ChatRoomCreateResponseDto {
         val buyer = memberRepository.findMemberByUserId(userId = userId) ?: throw NotExistMemberException();
-        val post = postRepository.findPostById(id = postId) ?: throw PostNotFoundException()
+        val post = postRepository.findPostById(postId = postId) ?: throw PostNotFoundException()
         val chatList = chatRepository.findByPostIdAndBuyerId(postId = postId, buyerId = buyer.id!!)
 
         //condition 1 : 판매 게시글의 작성자가 채팅방 생성 시도 시 필터링

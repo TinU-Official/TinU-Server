@@ -32,6 +32,6 @@ class ChatMessageController (
     @SendTo("/status/{roomId}")
     @Operation(summary = "채팅방 작성 상태 전송", description = "채팅방에 작성 상태를 전송합니다.")
     fun sendTypingStatus(chatTypingStatusRequestDto: ChatTypingStatusRequestDto) {
-       chatMessageService.sendTypingStatus(mapper.toChatTypingStatusInputDto(chatTypingStatusRequestDto))
+        chatMessageService.sendTypingStatus(mapper.toChatTypingStatusInputDto(chatTypingStatusRequestDto))
     }
 }

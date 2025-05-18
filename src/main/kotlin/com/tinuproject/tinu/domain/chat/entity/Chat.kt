@@ -1,6 +1,8 @@
-package com.tinuproject.tinu.domain.entity
+package com.tinuproject.tinu.domain.chat.entity
 
-import com.tinuproject.tinu.domain.entity.base.BaseEntity
+import com.tinuproject.tinu.domain.post.entity.Post
+import com.tinuproject.tinu.global.entity.BaseEntity
+import com.tinuproject.tinu.domain.member.entity.Member
 import jakarta.persistence.*
 
 @Entity
