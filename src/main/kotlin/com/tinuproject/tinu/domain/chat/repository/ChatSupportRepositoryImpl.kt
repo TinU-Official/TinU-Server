@@ -40,7 +40,7 @@ class ChatSupportRepositoryImpl(
                 when (sortedType) {
                     "buy" -> chat.buyer.id.eq(userId)
                     "sell" -> chat.seller.id.eq(userId)
-                    else -> null
+                    else -> chat.buyer.id.eq(userId).or(chat.seller.id.eq(userId))
                 }
             )
             .fetch()
