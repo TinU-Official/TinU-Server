@@ -5,6 +5,5 @@ import com.tinuproject.tinu.domain.chat.entity.ChatText
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface ChatTextRepository : JpaRepository<ChatText, Long> {
-
-    fun findByWriterId(userId : Long) : ChatText?
+//    fun findByWriterId(userId : Long) : ChatText?
 }

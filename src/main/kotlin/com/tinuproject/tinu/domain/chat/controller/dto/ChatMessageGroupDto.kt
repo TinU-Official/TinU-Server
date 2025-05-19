@@ -1,7 +1,6 @@
 package com.tinuproject.tinu.domain.chat.controller.dto
 
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailMessageResponseDto
-import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatMessageResponseDto
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
