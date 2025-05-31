@@ -55,7 +55,7 @@ class ChatRoomController (
     }
 
     //GET METHOD
-    @GetMapping("/chat/{chatId}")
+    @GetMapping("/{chatId}")
     @Operation(summary = "채팅방 상세 조회", description = "채팅방 상세 정보를 조회합니다.")
     @SwaggerExceptionResponses(
         exceptions = [
