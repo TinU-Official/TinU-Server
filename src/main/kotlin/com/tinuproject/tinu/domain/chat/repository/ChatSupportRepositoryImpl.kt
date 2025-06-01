@@ -5,6 +5,7 @@ import com.tinuproject.tinu.domain.chat.entity.QChat.chat
 import com.tinuproject.tinu.domain.chat.entity.QChatText.chatText
 import com.tinuproject.tinu.domain.post.entity.QPost.post
 import com.querydsl.core.types.Projections
+import com.querydsl.jpa.JPAExpressions
 import java.util.*
 import org.springframework.stereotype.Repository
 
@@ -14,12 +15,22 @@ class ChatSupportRepositoryImpl(
 ) : ChatSupportRepository {
     override fun findChatListByUserIdAndType(userId: Long, sortedType: String): List<ChatListGetOutputDto> {
 
-        // ChatText의 최신 메시지만 가져오기 위한 서브쿼리
+        // ChatText의 최신 메시지만 가져오기 위한 서브쿼리(쿼리 실행용)
         val subQuery = queryFactory.select(chatText.id)
             .from(chatText)
             .where(chatText.chat.id.eq(chat.id))
             .orderBy(chatText.createdAt.desc())
             .limit(1)
+
+        // 안읽은 메시지 개수 세는 서브쿼리(쿼리 객체 생성용)
+        val unreadCountSubQuery = JPAExpressions
+            .select(chatText.count())
+            .from(chatText)
+            .where(
+                chatText.chat.id.eq(chat.id),
+                chatText.isRead.isFalse, // 읽지 않은 메시지
+                chatText.writer.id.ne(userId) // 현재 사용자가 작성한 메시지는 제외
+            )
 
         return queryFactory.select(
             Projections.constructor(
@@ -30,7 +41,8 @@ class ChatSupportRepositoryImpl(
                 chat.seller.id,
                 chat.post.id,
                 chatText.text,
-                chatText.createdAt
+                chatText.createdAt,
+                unreadCountSubQuery // 안 읽은 메시지 개수 서브쿼리
             )
         )
             .from(chat)
