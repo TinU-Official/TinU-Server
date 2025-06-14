@@ -35,9 +35,7 @@ import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationC
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver
+import org.springframework.security.oauth2.client.web.*
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain
@@ -117,12 +115,18 @@ class SecurityConfig(
                         .requestMatchers("/api/token/**").permitAll()
                         .anyRequest().permitAll()//로그인 이후엔 모두 허용
                 }
-            )
+            ).oauth2Login {
+                it.authorizationEndpoint { endpoint ->
+                    endpoint
+                        .authorizationRequestRepository(authorizationRequestRepository())
+//                        .authorizationRequestResolver(...)
+                }
+            }
             .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
-                    .authorizationEndpoint { endpoint ->
-                        endpoint.authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
-                    }
+//                    .authorizationEndpoint { endpoint ->
+//                        endpoint.authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
+//                    }
                     .userInfoEndpoint { userInfo ->
                         userInfo.userService(customOAuth2UserService) // CustomOAuth2UserService 등록
                     }
@@ -205,6 +209,11 @@ class SecurityConfig(
     private fun extractRegistrationId(request: HttpServletRequest): String {
         val uri = request.requestURI
         return uri.substringAfterLast("/")
+    }
+
+    @Bean
+    fun authorizationRequestRepository(): AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
+        return HttpSessionOAuth2AuthorizationRequestRepository()
     }
 
 }
