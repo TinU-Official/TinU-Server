@@ -15,67 +15,67 @@ import org.springframework.security.web.SecurityFilterChain
 
 @Configuration
 class OAuth2LoginSecurityConfig {
-
-    @Bean
-    fun customAuthorizationRequestResolver(
-        clientRegistrationRepository: ClientRegistrationRepository
-    ): OAuth2AuthorizationRequestResolver {
-        val defaultResolver = DefaultOAuth2AuthorizationRequestResolver(
-            clientRegistrationRepository,
-            OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI
-        )
-
-        val log : Logger = LoggerFactory.getLogger(this::class.java)
-        return object : OAuth2AuthorizationRequestResolver {
-            override fun resolve(request: HttpServletRequest): OAuth2AuthorizationRequest? {
-                val resolved = defaultResolver.resolve(request) ?: return null
-
-                val registrationId = request.getParameter("registrationId") ?: extractRegistrationId(request)
-
-                log.info("resolve(1) 실행")
-                log.info(registrationId)
-
-                return if (registrationId == "apple") {
-                    OAuth2AuthorizationRequest.from(resolved)
-                        .additionalParameters { it["response_mode"] = "form_post" }
-                        .build()
-                } else {
-                    resolved
-                }
-            }
-
-            override fun resolve(request: HttpServletRequest, clientRegistrationId: String): OAuth2AuthorizationRequest? {
-                val resolved = defaultResolver.resolve(request, clientRegistrationId) ?: return null
-
-                log.info("resolve(2) 실행")
-                log.info(clientRegistrationId)
-
-                return if (clientRegistrationId == "apple") {
-                    OAuth2AuthorizationRequest.from(resolved)
-                        .additionalParameters { it["response_mode"] = "form_post" }
-                        .build()
-                } else {
-                    resolved
-                }
-            }
-        }
-    }
-
-    @Bean
-    fun securityFilterChain(
-        http: HttpSecurity,
-        resolver: OAuth2AuthorizationRequestResolver
-    ): SecurityFilterChain {
-        http
-            .oauth2Login {
-                it.authorizationEndpoint { endpoint ->
-                    endpoint.authorizationRequestResolver(resolver)
-                }
-            }
-        return http.build()
-    }
-    private fun extractRegistrationId(request: HttpServletRequest): String {
-        val uri = request.requestURI
-        return uri.substringAfterLast("/")
-    }
+//
+//    @Bean
+//    fun customAuthorizationRequestResolver(
+//        clientRegistrationRepository: ClientRegistrationRepository
+//    ): OAuth2AuthorizationRequestResolver {
+//        val defaultResolver = DefaultOAuth2AuthorizationRequestResolver(
+//            clientRegistrationRepository,
+//            OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI
+//        )
+//
+//        val log : Logger = LoggerFactory.getLogger(this::class.java)
+//        return object : OAuth2AuthorizationRequestResolver {
+//            override fun resolve(request: HttpServletRequest): OAuth2AuthorizationRequest? {
+//                val resolved = defaultResolver.resolve(request) ?: return null
+//
+//                val registrationId = request.getParameter("registrationId") ?: extractRegistrationId(request)
+//
+//                log.info("resolve(1) 실행")
+//                log.info(registrationId)
+//
+//                return if (registrationId == "apple") {
+//                    OAuth2AuthorizationRequest.from(resolved)
+//                        .additionalParameters { it["response_mode"] = "form_post" }
+//                        .build()
+//                } else {
+//                    resolved
+//                }
+//            }
+//
+//            override fun resolve(request: HttpServletRequest, clientRegistrationId: String): OAuth2AuthorizationRequest? {
+//                val resolved = defaultResolver.resolve(request, clientRegistrationId) ?: return null
+//
+//                log.info("resolve(2) 실행")
+//                log.info(clientRegistrationId)
+//
+//                return if (clientRegistrationId == "apple") {
+//                    OAuth2AuthorizationRequest.from(resolved)
+//                        .additionalParameters { it["response_mode"] = "form_post" }
+//                        .build()
+//                } else {
+//                    resolved
+//                }
+//            }
+//        }
+//    }
+//
+//    @Bean
+//    fun securityFilterChain(
+//        http: HttpSecurity,
+//        resolver: OAuth2AuthorizationRequestResolver
+//    ): SecurityFilterChain {
+//        http
+//            .oauth2Login {
+//                it.authorizationEndpoint { endpoint ->
+//                    endpoint.authorizationRequestResolver(resolver)
+//                }
+//            }
+//        return http.build()
+//    }
+//    private fun extractRegistrationId(request: HttpServletRequest): String {
+//        val uri = request.requestURI
+//        return uri.substringAfterLast("/")
+//    }
 }

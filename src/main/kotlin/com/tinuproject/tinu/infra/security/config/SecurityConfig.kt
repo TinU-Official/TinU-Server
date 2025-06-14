@@ -11,6 +11,9 @@ import com.tinuproject.tinu.infra.security.oauth.apple.AppleTokenResponseClient
 import com.tinuproject.tinu.infra.security.oauth.handler.OAuthLoginFailureHandler
 import com.tinuproject.tinu.infra.security.oauth.handler.OAuthLoginSuccessHandler
 import com.tinuproject.tinu.infra.security.oauth.service.CustomOAuth2UserService
+import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,7 +34,12 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver
 import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
@@ -46,7 +54,6 @@ class SecurityConfig(
     @Value("\${web.allowed-path}")
     private val allowedPaths : List<String>,
     private val objectMapper: ObjectMapper,
-
     private val appleJwtGenerator: AppleJwtGenerator
 ) {
 
@@ -93,7 +100,7 @@ class SecurityConfig(
 
     @Bean
     @Throws(Exception::class)
-    fun filterChain(httpSecurity: HttpSecurity, memberRepository: MemberRepository): SecurityFilterChain {
+    fun filterChain(httpSecurity: HttpSecurity, memberRepository: MemberRepository,  clientRegistrationRepository: ClientRegistrationRepository): SecurityFilterChain {
         val sessionManagement = httpSecurity.httpBasic { obj: HttpBasicConfigurer<HttpSecurity> -> obj.disable() }
             //cors 설정
             .cors { corsConfigurer: CorsConfigurer<HttpSecurity?> ->
@@ -113,6 +120,9 @@ class SecurityConfig(
             )
             .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
+                    .authorizationEndpoint { endpoint ->
+                        endpoint.authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
+                    }
                     .userInfoEndpoint { userInfo ->
                         userInfo.userService(customOAuth2UserService) // CustomOAuth2UserService 등록
                     }
@@ -147,6 +157,54 @@ class SecurityConfig(
         return AppleTokenResponseClient {
             appleJwtGenerator.generate()
         }
+    }
+
+    private fun customAuthorizationRequestResolver(
+        clientRegistrationRepository: ClientRegistrationRepository
+    ): OAuth2AuthorizationRequestResolver {
+        val defaultResolver = DefaultOAuth2AuthorizationRequestResolver(
+            clientRegistrationRepository,
+            OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI
+        )
+
+        val log: Logger = LoggerFactory.getLogger(this::class.java)
+
+        return object : OAuth2AuthorizationRequestResolver {
+            override fun resolve(request: HttpServletRequest): OAuth2AuthorizationRequest? {
+                val resolved = defaultResolver.resolve(request) ?: return null
+
+                val registrationId = request.getParameter("registrationId") ?: extractRegistrationId(request)
+
+                log.info("resolve(1) 실행 - registrationId: {}", registrationId)
+
+                return if (registrationId == "apple") {
+                    OAuth2AuthorizationRequest.from(resolved)
+                        .additionalParameters { it["response_mode"] = "form_post" }
+                        .build()
+                } else {
+                    resolved
+                }
+            }
+
+            override fun resolve(request: HttpServletRequest, clientRegistrationId: String): OAuth2AuthorizationRequest? {
+                val resolved = defaultResolver.resolve(request, clientRegistrationId) ?: return null
+
+                log.info("resolve(2) 실행 - clientRegistrationId: {}", clientRegistrationId)
+
+                return if (clientRegistrationId == "apple") {
+                    OAuth2AuthorizationRequest.from(resolved)
+                        .additionalParameters { it["response_mode"] = "form_post" }
+                        .build()
+                } else {
+                    resolved
+                }
+            }
+        }
+    }
+
+    private fun extractRegistrationId(request: HttpServletRequest): String {
+        val uri = request.requestURI
+        return uri.substringAfterLast("/")
     }
 
 }
