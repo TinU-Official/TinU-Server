@@ -1,6 +1,8 @@
 package com.tinuproject.tinu.infra.security.config
 
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -23,13 +25,14 @@ class OAuth2LoginSecurityConfig {
             OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI
         )
 
-
+        val log : Logger = LoggerFactory.getLogger(this::class.java)
         return object : OAuth2AuthorizationRequestResolver {
             override fun resolve(request: HttpServletRequest): OAuth2AuthorizationRequest? {
                 val resolved = defaultResolver.resolve(request) ?: return null
 
                 val registrationId = request.getParameter("registrationId") ?: extractRegistrationId(request)
 
+                log.info(registrationId)
 
                 return if (registrationId == "apple") {
                     OAuth2AuthorizationRequest.from(resolved)
