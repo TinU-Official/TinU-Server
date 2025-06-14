@@ -106,6 +106,8 @@ jobs:
           spring.security.oauth2.client.provider.apple.token-uri=${{ secrets.APPLE_TOKEN_URI }}
           spring.security.oauth2.client.provider.apple.user-info-uri=${{ secrets.APPLE_USER_INFO_URI}}
           spring.security.oauth2.client.provider.apple.user-name-attribute=${{ secrets.APPLE_USER_NAME }}
+          apple.team_id= ${{ secrets.APPLE_TEAM_ID }}
+          apple.login_key = ${{ secrets.APPLE_LOGIN_KEY }}
           EOF
 
       # docker image 빌드

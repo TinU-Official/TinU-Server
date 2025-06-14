@@ -32,10 +32,10 @@ data class AppleProperties(
     @Value("\${spring.security.oauth2.client.provider.apple.user-name-attribute}")
     val userNameAttribute: String,
 
-    @Value("\${oauth.apple.team-id}")
+    @Value("\${apple.team_id}")
     val teamId: String,
 
-    @Value("\${oauth.apple.key-id}")
+    @Value("\${apple.login_key}")
     val loginKey: String
 ) {
 //    lateinit var teamId : String
