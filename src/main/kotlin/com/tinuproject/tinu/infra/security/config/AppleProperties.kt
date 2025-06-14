@@ -1,22 +1,54 @@
 package com.tinuproject.tinu.infra.security.config
 
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Configuration
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
-@Configuration
-@ConfigurationProperties("apple")
-class AppleProperties {
-    lateinit var teamId : String
+@Component
+data class AppleProperties(
+    @Value("\${spring.security.oauth2.client.registration.apple.client-id}")
+    val clientId: String,
 
-    lateinit var loginKey : String
+    @Value("\${spring.security.oauth2.client.registration.apple.client-secret}")
+    val clientSecret: String,
 
-    lateinit var clientId:String
+    @Value("\${spring.security.oauth2.client.registration.apple.redirect-uri}")
+    val redirectUrl: String,
 
-    lateinit var redirectUrl : String
+    @Value("\${spring.security.oauth2.client.registration.apple.scope}")
+    val scope: String,
 
-    lateinit var keyPath:String
+    @Value("\${spring.security.oauth2.client.registration.apple.authorization-grant-type}")
+    val grantType: String,
 
-    lateinit var tokenUrl : String
+    @Value("\${spring.security.oauth2.client.provider.apple.authorization-uri}")
+    val authUrl: String,
 
-    lateinit var authUrl : String
+    @Value("\${spring.security.oauth2.client.provider.apple.token-uri}")
+    val tokenUrl: String,
+
+    @Value("\${spring.security.oauth2.client.provider.apple.user-info-uri}")
+    val userInfoUrl: String,
+
+    @Value("\${spring.security.oauth2.client.provider.apple.user-name-attribute}")
+    val userNameAttribute: String,
+
+    @Value("\${oauth.apple.team-id}")
+    val teamId: String,
+
+    @Value("\${oauth.apple.key-id}")
+    val loginKey: String
+) {
+//    lateinit var teamId : String
+//
+//    lateinit var loginKey : String
+//
+//    lateinit var clientId:String
+//
+//    lateinit var redirectUrl : String
+//
+//    lateinit var clientSecret:String
+//
+//    lateinit var tokenUrl : String
+//
+//    lateinit var authUrl : String
 }

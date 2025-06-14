@@ -6,6 +6,8 @@ import com.tinuproject.tinu.infra.security.filter.ExceptionHandlerFilter
 import com.tinuproject.tinu.infra.security.filter.JwtTokenFilter
 import com.tinuproject.tinu.infra.security.filter.SignUpFilter
 import com.tinuproject.tinu.infra.security.jwt.JwtUtil
+import com.tinuproject.tinu.infra.security.oauth.apple.AppleJwtGenerator
+import com.tinuproject.tinu.infra.security.oauth.apple.AppleTokenResponseClient
 import com.tinuproject.tinu.infra.security.oauth.handler.OAuthLoginFailureHandler
 import com.tinuproject.tinu.infra.security.oauth.handler.OAuthLoginSuccessHandler
 import com.tinuproject.tinu.infra.security.oauth.service.CustomOAuth2UserService
@@ -26,6 +28,10 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer
 import org.springframework.security.config.annotation.web.configurers.oauth2.client.OAuth2LoginConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
+import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient
+import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
+import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
@@ -39,7 +45,9 @@ class SecurityConfig(
     private val memberRepository: MemberRepository,
     @Value("\${web.allowed-path}")
     private val allowedPaths : List<String>,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+
+    private val appleJwtGenerator: AppleJwtGenerator
 ) {
 
     @Bean
@@ -61,6 +69,25 @@ class SecurityConfig(
             config.setAllowedOriginPatterns(Collections.singletonList("*")) // 허용할 origin
             config.allowCredentials = true
             config
+        }
+    }
+    @Bean
+    fun delegatingTokenResponseClient(
+        appleJwtGenerator: AppleJwtGenerator
+    ): OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+
+        val appleTokenClient = AppleTokenResponseClient { appleJwtGenerator.generate() }
+        val defaultTokenClient = DefaultAuthorizationCodeTokenResponseClient()
+
+        return object : OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+            override fun getTokenResponse(request: OAuth2AuthorizationCodeGrantRequest): OAuth2AccessTokenResponse {
+                val registrationId = request.clientRegistration.registrationId
+                return if (registrationId == "apple") {
+                    appleTokenClient.getTokenResponse(request)
+                } else {
+                    defaultTokenClient.getTokenResponse(request)
+                }
+            }
         }
     }
 
@@ -89,6 +116,9 @@ class SecurityConfig(
                     .userInfoEndpoint { userInfo ->
                         userInfo.userService(customOAuth2UserService) // CustomOAuth2UserService 등록
                     }
+                    .tokenEndpoint { token ->
+                        token.accessTokenResponseClient(delegatingTokenResponseClient(appleJwtGenerator))
+                    }
                     //TODO(로그인이 필요한데 안된 부분이 있으면 넘길 수 있는 것.)- 기본은 (백엔드 도메인)/login
                     //.loginPage("http://localhost:8080/loginpage.html").permitAll()
                     .successHandler(oauth2LoginSuccessHandler) // 로그인 성공 시 핸들러
@@ -111,4 +141,12 @@ class SecurityConfig(
         return httpSecurity.build()
 
     }
+
+    @Bean
+    fun appleTokenResponseClient(): OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
+        return AppleTokenResponseClient {
+            appleJwtGenerator.generate()
+        }
+    }
+
 }

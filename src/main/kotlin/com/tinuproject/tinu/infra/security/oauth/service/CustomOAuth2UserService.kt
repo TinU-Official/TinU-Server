@@ -5,10 +5,13 @@ import com.tinuproject.tinu.domain.member.entity.SocialMember
 import com.tinuproject.tinu.domain.member.enums.Social
 import com.tinuproject.tinu.domain.member.repository.SocialMemberRepository
 import com.tinuproject.tinu.domain.member.repository.RefreshTokenRepository
+import io.jsonwebtoken.Jwts
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import java.util.*
@@ -27,8 +30,12 @@ class CustomOAuth2UserService(
 
         val provider :String = userRequest!!.clientRegistration.clientName
 
-        val oauth2User : OAuth2User = super.loadUser(userRequest)
-
+        val oauth2User : OAuth2User
+        if(provider=="Apple"){
+            oauth2User = appleLoadUser(userRequest)
+        }else{
+            oauth2User  = super.loadUser(userRequest)
+        }
 
         when (provider) {
 
@@ -46,6 +53,11 @@ class CustomOAuth2UserService(
             "Google" -> {
                 log.info("구글 로그인 요청")
                 oAuth2UserInfo = GoogleUserInfo(oauth2User.attributes)
+            }
+
+            "Apple" -> {
+                log.info("Apple 로그인 요청")
+                oAuth2UserInfo = AppleUserInfo(oauth2User.attributes)
             }
         }
 
@@ -72,6 +84,31 @@ class CustomOAuth2UserService(
         log.info("USER_ID : {}",user.userId)
 
         return CustomOAuth2User(userInfoDto = userInfoDto)
+    }
+
+    fun appleLoadUser(userRequest: OAuth2UserRequest?) : OAuth2User{
+        val idToken = userRequest!!.additionalParameters["id_token"] as? String
+            ?: throw IllegalArgumentException("Missing id_token from Apple")
+
+        val claims = parseIdToken(idToken)
+
+        val attributes = mapOf(
+            "sub" to claims["sub"],
+            "email" to claims["email"],
+            "email_verified" to claims["email_verified"]
+        )
+
+        return DefaultOAuth2User(
+            listOf(SimpleGrantedAuthority("ROLE_USER")),
+            attributes,
+            "sub" // user-name-attribute
+        )
+    }
+
+    private fun parseIdToken(idToken: String): Map<String, Any> {
+        val parser = Jwts.parserBuilder().build()
+        val jwt = parser.parseClaimsJws(idToken) // 서명 검증은 생략하거나 키로 구성 가능
+        return jwt.body
     }
 
 
