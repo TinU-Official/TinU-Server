@@ -32,6 +32,7 @@ class OAuth2LoginSecurityConfig {
 
                 val registrationId = request.getParameter("registrationId") ?: extractRegistrationId(request)
 
+                log.info("resolve(1) 실행")
                 log.info(registrationId)
 
                 return if (registrationId == "apple") {
@@ -45,6 +46,9 @@ class OAuth2LoginSecurityConfig {
 
             override fun resolve(request: HttpServletRequest, clientRegistrationId: String): OAuth2AuthorizationRequest? {
                 val resolved = defaultResolver.resolve(request, clientRegistrationId) ?: return null
+
+                log.info("resolve(2) 실행")
+                log.info(clientRegistrationId)
 
                 return if (clientRegistrationId == "apple") {
                     OAuth2AuthorizationRequest.from(resolved)
