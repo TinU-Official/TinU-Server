@@ -96,8 +96,8 @@ jobs:
           spring.security.oauth2.client.registration.google.scope=${{ secrets.GOOGLE_SCOPE }}
           spring.security.oauth2.client.registration.google.redirect-uri=${{ secrets.GOOGLE_REDIRECT_URI }}
           spring.security.oauth2.client.registration.google.client-name=${{ secrets.GOOGLE_CLIENT_NAME }}
-          spring.security.oauth2.client.registration.apple.client-name=${APPLE_CLIENT_NAME}
-          spring.security.oauth2.client.registration.apple.client-id=${APPLE_CLIENT_ID}
+          spring.security.oauth2.client.registration.apple.client-name=${{ secrets.APPLE_CLIENT_NAME}}
+          spring.security.oauth2.client.registration.apple.client-id=${{ secrets.APPLE_CLIENT_ID }}
           spring.security.oauth2.client.registration.apple.client-secret=${{ secrets.APPLE_CLIENT_SECRET}}
           spring.security.oauth2.client.registration.apple.scope=${{ secrets.APPLE_SCOPE}}
           spring.security.oauth2.client.registration.apple.redirect-uri=${{ secrets.APPLE_REDIRECT_URI }}
