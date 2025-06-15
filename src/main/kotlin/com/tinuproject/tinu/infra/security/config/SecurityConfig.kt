@@ -90,6 +90,7 @@ class SecurityConfig(
                 val log : Logger = LoggerFactory.getLogger(this::class.java)
                 log.info(registrationId)
                 return if (registrationId == "apple") {
+                    log.info("apple getTokenResponse 실행")
                     appleTokenClient.getTokenResponse(request)
                 } else {
                     defaultTokenClient.getTokenResponse(request)

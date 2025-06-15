@@ -23,16 +23,19 @@ class AppleTokenResponseClient(
         val redirectUri = request.authorizationExchange.authorizationRequest.redirectUri
         val code = request.authorizationExchange.authorizationResponse.code
 
+        val jwtToken = jwtGenerator()
         val formData = LinkedMultiValueMap<String, String>().apply {
             add("client_id", clientRegistration.clientId)
-            add("client_secret", jwtGenerator())
+            add("client_secret", jwtToken)
             add("code", code)
             add("grant_type", "authorization_code")
             add("redirect_uri", redirectUri)
         }
 
         val log :Logger = LoggerFactory.getLogger(this::class.java)
-
+        log.info("============================")
+        log.info("token")
+        log.info(jwtToken)
         log.info(formData["client_secret"].toString())
         log.info(formData.toString())
         val headers = HttpHeaders().apply {
