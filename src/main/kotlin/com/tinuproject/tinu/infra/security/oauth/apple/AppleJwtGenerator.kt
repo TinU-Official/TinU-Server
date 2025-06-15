@@ -3,6 +3,8 @@ package com.tinuproject.tinu.infra.security.oauth.apple
 import com.tinuproject.tinu.infra.security.config.AppleProperties
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.security.KeyFactory
 import java.security.PrivateKey
@@ -33,10 +35,16 @@ class AppleJwtGenerator(
     }
 
     private fun loadPrivateKey(): PrivateKey {
+        val log : Logger = LoggerFactory.getLogger(this::class.java)
+
+        log.info(appleProperties.clientSecret)
+
         val privateKeyPem = appleProperties.clientSecret
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
             .replace("\\s+".toRegex(), "") // 공백/줄바꿈 제거
+
+        log.info(privateKeyPem)
 
         val keyBytes = Base64.getDecoder().decode(privateKeyPem)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)

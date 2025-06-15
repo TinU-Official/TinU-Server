@@ -117,10 +117,10 @@ class SecurityConfig(
                 }
             ).oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
                 oauth
-                    .authorizationEndpoint { endpoint ->
-                        endpoint
-                            .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository)) // 이건 필요할 때만
-                    }
+//                    .authorizationEndpoint { endpoint ->
+//                        endpoint
+//                            .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository)) // 이건 필요할 때만
+//                    }
                     .userInfoEndpoint { userInfo ->
                         userInfo.userService(customOAuth2UserService) // CustomOAuth2UserService 등록
                     }
