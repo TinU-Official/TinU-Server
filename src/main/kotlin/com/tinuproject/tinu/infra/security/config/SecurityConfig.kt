@@ -87,6 +87,8 @@ class SecurityConfig(
         return object : OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
             override fun getTokenResponse(request: OAuth2AuthorizationCodeGrantRequest): OAuth2AccessTokenResponse {
                 val registrationId = request.clientRegistration.registrationId
+                val log : Logger = LoggerFactory.getLogger(this::class.java)
+                log.info(registrationId)
                 return if (registrationId == "apple") {
                     appleTokenClient.getTokenResponse(request)
                 } else {
