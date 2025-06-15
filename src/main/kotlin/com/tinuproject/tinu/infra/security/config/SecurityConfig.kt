@@ -119,7 +119,6 @@ class SecurityConfig(
                 oauth
                     .authorizationEndpoint { endpoint ->
                         endpoint
-                            .authorizationRequestRepository(authorizationRequestRepository())
                             .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository)) // 이건 필요할 때만
                     }
                     .userInfoEndpoint { userInfo ->
@@ -206,9 +205,5 @@ class SecurityConfig(
         return uri.substringAfterLast("/")
     }
 
-    @Bean
-    fun authorizationRequestRepository(): AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-        return HttpSessionOAuth2AuthorizationRequestRepository()
-    }
 
 }

@@ -5,7 +5,9 @@ import com.tinuproject.tinu.domain.member.entity.SocialMember
 import com.tinuproject.tinu.domain.member.enums.Social
 import com.tinuproject.tinu.domain.member.repository.SocialMemberRepository
 import com.tinuproject.tinu.domain.member.repository.RefreshTokenRepository
+import com.tinuproject.tinu.infra.security.config.AppleProperties
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -14,12 +16,14 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 @Service
 class CustomOAuth2UserService(
     private val userRepository: SocialMemberRepository,
-    private val refreshTokenRepository : RefreshTokenRepository
+    private val refreshTokenRepository : RefreshTokenRepository,
+    private val appleProperties: AppleProperties
 ): DefaultOAuth2UserService() {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
@@ -106,7 +110,11 @@ class CustomOAuth2UserService(
     }
 
     private fun parseIdToken(idToken: String): Map<String, Any> {
-        val parser = Jwts.parserBuilder().build()
+        val secretKeyBytes = appleProperties.clientSecret.toByteArray(StandardCharsets.UTF_8)
+        val key = Keys.hmacShaKeyFor(secretKeyBytes)
+
+
+        val parser = Jwts.parserBuilder().setSigningKey(key).build()
         val jwt = parser.parseClaimsJws(idToken) // 서명 검증은 생략하거나 키로 구성 가능
         return jwt.body
     }
