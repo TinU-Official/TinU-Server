@@ -1,5 +1,7 @@
 package com.tinuproject.tinu.infra.security.oauth.apple
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.*
 import org.springframework.security.oauth2.client.endpoint.OAuth2AuthorizationCodeGrantRequest
 import org.springframework.util.LinkedMultiValueMap
@@ -29,6 +31,9 @@ class AppleTokenResponseClient(
             add("redirect_uri", redirectUri)
         }
 
+        val log :Logger = LoggerFactory.getLogger(this::class.java)
+
+        log.info(formData["client_secret"].toString())
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
         }

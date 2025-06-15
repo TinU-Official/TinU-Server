@@ -30,7 +30,7 @@ class AppleJwtGenerator(
             .setExpiration(from(exp))
             .setAudience("https://appleid.apple.com")
             .setSubject(appleProperties.clientId)
-            .signWith(loadPrivateKey(), SignatureAlgorithm.ES256)
+            .signWith(loadPrivateKey(), SignatureAlgorithm.RS256)
             .compact()
     }
 
