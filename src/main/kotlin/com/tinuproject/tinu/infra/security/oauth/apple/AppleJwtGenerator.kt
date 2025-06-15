@@ -30,24 +30,23 @@ class AppleJwtGenerator(
             .setExpiration(from(exp))
             .setAudience("https://appleid.apple.com")
             .setSubject(appleProperties.clientId)
-            .signWith(loadPrivateKey(), SignatureAlgorithm.RS256)
+            .signWith(SignatureAlgorithm.ES256,appleProperties.clientSecret)
             .compact()
     }
 
     private fun loadPrivateKey(): PrivateKey {
         val log : Logger = LoggerFactory.getLogger(this::class.java)
 
-        log.info(appleProperties.clientSecret)
 
         val privateKeyPem = appleProperties.clientSecret
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
             .replace("\\s+".toRegex(), "") // 공백/줄바꿈 제거
 
-        log.info(privateKeyPem)
 
         val keyBytes = Base64.getDecoder().decode(privateKeyPem)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
+        log.info("인스턴스 획득")
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
 
     }

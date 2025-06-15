@@ -17,13 +17,14 @@ class AppleTokenResponseClient(
 ) : OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
     private val restTemplate = RestTemplate()
-
+    val log :Logger = LoggerFactory.getLogger(this::class.java)
     override fun getTokenResponse(request: OAuth2AuthorizationCodeGrantRequest): OAuth2AccessTokenResponse {
         val clientRegistration = request.clientRegistration
         val redirectUri = request.authorizationExchange.authorizationRequest.redirectUri
         val code = request.authorizationExchange.authorizationResponse.code
-
+        log.info("jwtToken Generator 실행")
         val jwtToken = jwtGenerator()
+        log.info("토큰 획득")
         val formData = LinkedMultiValueMap<String, String>().apply {
             add("client_id", clientRegistration.clientId)
             add("client_secret", jwtToken)
@@ -32,7 +33,7 @@ class AppleTokenResponseClient(
             add("redirect_uri", redirectUri)
         }
 
-        val log :Logger = LoggerFactory.getLogger(this::class.java)
+
         log.info("============================")
         log.info("token")
         log.info(jwtToken)
