@@ -37,13 +37,12 @@ class AppleJwtGenerator(
     private fun loadPrivateKey(): PrivateKey {
         val log : Logger = LoggerFactory.getLogger(this::class.java)
 
-
+        log.info("loadPrivatetKey 실행")
         val privateKeyPem = appleProperties.clientSecret
             .replace("-----BEGIN PRIVATE KEY-----", "")
             .replace("-----END PRIVATE KEY-----", "")
             .replace("\\s+".toRegex(), "") // 공백/줄바꿈 제거
-
-
+        log.info("privatekeyPem = $privateKeyPem")
         val keyBytes = Base64.getDecoder().decode(privateKeyPem)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
         log.info("인스턴스 획득")
