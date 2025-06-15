@@ -33,10 +33,14 @@ class AppleJwtGenerator(
     }
 
     private fun loadPrivateKey(): PrivateKey {
+        val privateKeyPem = appleProperties.clientSecret
+            .replace("-----BEGIN PRIVATE KEY-----", "")
+            .replace("-----END PRIVATE KEY-----", "")
+            .replace("\\s+".toRegex(), "") // 공백/줄바꿈 제거
 
-
-        val keyBytes = Base64.getDecoder().decode(appleProperties.clientSecret)
+        val keyBytes = Base64.getDecoder().decode(privateKeyPem)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+
     }
 }
