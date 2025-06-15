@@ -12,6 +12,6 @@ class AppleUserInfo(
     }
 
     override fun getName(): String {
-        TODO("삭제 예정")
+        return "temp"
     }
 }
