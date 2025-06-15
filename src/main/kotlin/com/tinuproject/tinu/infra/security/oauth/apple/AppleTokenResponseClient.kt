@@ -34,6 +34,7 @@ class AppleTokenResponseClient(
         val log :Logger = LoggerFactory.getLogger(this::class.java)
 
         log.info(formData["client_secret"].toString())
+        log.info(formData.toString())
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
         }

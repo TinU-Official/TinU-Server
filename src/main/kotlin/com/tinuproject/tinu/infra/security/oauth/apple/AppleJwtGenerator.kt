@@ -48,7 +48,7 @@ class AppleJwtGenerator(
 
         val keyBytes = Base64.getDecoder().decode(privateKeyPem)
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
-        return KeyFactory.getInstance("EC").generatePrivate(keySpec)
+        return KeyFactory.getInstance("RSA").generatePrivate(keySpec)
 
     }
 }
