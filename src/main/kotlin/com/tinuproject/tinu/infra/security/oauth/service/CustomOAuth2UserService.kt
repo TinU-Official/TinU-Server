@@ -7,6 +7,7 @@ import com.tinuproject.tinu.domain.member.repository.SocialMemberRepository
 import com.tinuproject.tinu.domain.member.repository.RefreshTokenRepository
 import com.tinuproject.tinu.infra.security.config.AppleProperties
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,7 +18,14 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User
 import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 import java.nio.charset.StandardCharsets
+import java.security.KeyFactory
+import java.security.PublicKey
+import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
+import org.json.JSONObject
+import java.math.BigInteger
+import java.net.URL
+import java.security.spec.RSAPublicKeySpec
 
 @Service
 class CustomOAuth2UserService(
@@ -110,13 +118,38 @@ class CustomOAuth2UserService(
     }
 
     private fun parseIdToken(idToken: String): Map<String, Any> {
-        val secretKeyBytes = appleProperties.clientSecret.toByteArray(StandardCharsets.UTF_8)
-        val key = Keys.hmacShaKeyFor(secretKeyBytes)
+        log.info("token parse")
 
-
-        val parser = Jwts.parserBuilder().setSigningKey(key).build()
+        val parser = Jwts.parserBuilder().setSigningKey(getApplePublicKey(idToken)).build()
         val jwt = parser.parseClaimsJws(idToken) // 서명 검증은 생략하거나 키로 구성 가능
         return jwt.body
+    }
+
+    fun getApplePublicKey(idToken: String): PublicKey {
+        val parts = idToken.split(".")
+        val headerJson = String(Base64.getUrlDecoder().decode(parts[0]))
+        val header = JSONObject(headerJson)
+        val kid = header.getString("kid")
+
+        val jwksUrl = URL("https://appleid.apple.com/auth/keys")
+        val jwks = JSONObject(jwksUrl.readText())
+        val keys = jwks.getJSONArray("keys")
+
+        for (i in 0 until keys.length()) {
+            val key = keys.getJSONObject(i)
+            if (key.getString("kid") == kid) {
+                val n = key.getString("n")
+                val e = key.getString("e")
+
+                val modulus = BigInteger(1, Base64.getUrlDecoder().decode(n))
+                val exponent = BigInteger(1, Base64.getUrlDecoder().decode(e))
+
+                val keySpec = RSAPublicKeySpec(modulus, exponent)
+                return KeyFactory.getInstance("RSA").generatePublic(keySpec)
+            }
+        }
+
+        throw IllegalArgumentException("Public key not found for kid: $kid")
     }
 
 

@@ -77,6 +77,9 @@ dependencies {
 	//coroutine 관련 의존성 추가
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1'
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.1'
+
+	//json 관련 의존성 추가
+	implementation "org.json:json:20240303"
 }
 
 // Querydsl 설정부
