@@ -135,14 +135,14 @@ jobs:
       - name: Publish to docker hub
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_IMAGENAME }}
 
-      # AWS Instance 접속 & Application 실행
-      - name: Connect to AWS & Execute Application
+      # OCI Instance 접속 & Application 실행
+      - name: Connect to OCI Instance & Execute Application
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ${{ secrets.AWS_USERNAME }}
-          key: ${{ secrets.AWS_SSH_KEY }}
-          port: ${{ secrets.AWS_SSH_PORT }}
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USERNAME }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: ${{ secrets.OCI_SSH_PORT }}
           script: |
             cd app/
             docker-compose down
