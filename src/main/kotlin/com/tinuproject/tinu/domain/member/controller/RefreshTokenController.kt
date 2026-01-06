@@ -1,5 +1,6 @@
 package com.tinuproject.tinu.domain.member.controller
 
+import com.tinuproject.tinu.domain.member.controller.docs.RefreshTokenSwaggerDocs
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import com.tinuproject.tinu.domain.member.exception.ExpiredTokenException
 import com.tinuproject.tinu.domain.member.exception.InvalidedTokenException
@@ -29,14 +30,12 @@ class RefreshTokenController(
 
     @Value("\${cookie.token.refresh-token}")
     private val refreshTokenkey : String,
-) {
+) : RefreshTokenSwaggerDocs{
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
 
     @GetMapping("/refresh")
-    @SwaggerExceptionResponses(exceptions = [NotFoundTokenException::class, InvalidedTokenException::class, ExpiredTokenException::class, ])
-    @Operation(summary = "AccessToken 재발급 API", description = "RefreshToken을 통해 AccessToken을 재발급 받는 로직입니다.")
-    fun refreshAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "RefreshToken") refreshToken : String?): ResponseEntity<ResponseDTO<NullResponse?>> {
+    override fun refreshAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "RefreshToken") refreshToken : String?): ResponseEntity<ResponseDTO<NullResponse?>> {
         log.info("AccessToken 갱신 시도")
 
         refreshToken?:throw NotFoundTokenException()

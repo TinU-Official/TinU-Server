@@ -1,5 +1,6 @@
 package com.tinuproject.tinu.domain.member.controller
 
+import com.tinuproject.tinu.domain.member.controller.docs.RegisterSwaggerDocs
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import com.tinuproject.tinu.domain.member.exception.NeedEmailAuthException
 import com.tinuproject.tinu.domain.member.exception.NotExistCodeException
@@ -33,7 +34,7 @@ import java.util.*
 class RegisterController(
     val memberService: MemberService,
     val registerService: RegisterService
-) {
+) : RegisterSwaggerDocs {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
 
@@ -45,11 +46,7 @@ class RegisterController(
                 -> 있다면 이미 사용 중인 이메일이라는 결과 반환
      */
     @GetMapping("/email-check")
-    @SwaggerExceptionResponses(exceptions = [NotExistDomainException::class, ExistEmailException::class, ExistMemberException::class])
-    @Operation(summary = "사용가능한 email인지 확인하는 API", description = "해당 이메일이 사용가능한 이메일인지 체크합니다." +
-            "<br>체크 여부 : 1. 우리 서비스에서 관리하는 도메인인지 2. 이미 인증을 진행한 계정은 아닌지 3. 이미 회원가입을 완료한 회원이 아닌지 " +
-            "<br>리퀘스트 파람 : 확인하고자하는 email")
-    fun emailCheck(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "email") email : String) : ResponseEntity<ResponseDTO<NullResponse?>> {
+    override fun emailCheck(@AuthenticationPrincipal userId : UUID, @RequestParam(name = "email") email : String) : ResponseEntity<ResponseDTO<NullResponse?>> {
         registerService.checkEmailValidation(userId,email)
 
         return ResponseEntityGenerator.onSuccess()
@@ -66,11 +63,7 @@ class RegisterController(
      */
     //인증번호 요청
     @PostMapping("/email-auth")
-    @SwaggerExceptionResponses(exceptions = [NotExistDomainException::class, ExistEmailException::class, ExistMemberException::class])
-    @Operation(summary = "사용가능한 email에 대해 인증 메일을 보내는 API", description = "이메일을 전송하는 API입니다." +
-            "<br>이메일 전송 전 해당 이메일이 유효한지 한번 더 검증합니다." +
-            "<br>RequestBody로 email을 받습니다.")
-    fun emailCodeRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailAuthRequestDTO: EmailAuthRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun emailCodeRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailAuthRequestDTO: EmailAuthRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         registerService.checkEmailValidation(userId,emailAuthRequestDTO.email)
 
         registerService.sendMail(userId,emailAuthRequestDTO)
@@ -88,10 +81,7 @@ class RegisterController(
      */
 
     @PutMapping(("/code-check"))
-    @SwaggerExceptionResponses(exceptions = [NotExistCodeException::class, NotMatchCodeException::class])
-    @Operation(summary = "이메일 인증 코드를 확인하는 API", description = "이메일 인증 코드를 검증하는 API입니다." +
-            "<br>검증 내용은 1. 이메일 인증 시도를 한 사람인 지 2. 인증 코드가 일치하는 지를 확인합니다.")
-    fun emailCodeCheckRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailCodeCheckRequestDTO: EmailCodeCheckRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun emailCodeCheckRequest(@AuthenticationPrincipal userId : UUID, @RequestBody emailCodeCheckRequestDTO: EmailCodeCheckRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         registerService.checkCode(userId, emailCodeCheckRequestDTO)
         return ResponseEntityGenerator.onSuccess()
     }
@@ -104,23 +94,13 @@ class RegisterController(
             2. 가능하다면 가능하다는 응답 전송
      */
     @GetMapping("/nick-check")
-    @SwaggerExceptionResponses(exceptions = [ExistNameException::class])
-    @Operation(summary = "사용가능한 닉네임인지 검증하는 API", description = "사용가능한 닉네임인지 검증하는 API입니다." +
-            "<br>본래 사용하던 사람이 동일한 닉네임으로 검증을 진행하면 이는 가능하게 설정해두었습니다.")
-    fun nickNameCheckRequest(@AuthenticationPrincipal userId : UUID,@RequestParam(name = "name") nickName :String) : ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun nickNameCheckRequest(@AuthenticationPrincipal userId : UUID, @RequestParam(name = "name") nickName :String) : ResponseEntity<ResponseDTO<NullResponse?>>{
         memberService.usableMemberByNickname(userId,nickName)
         return ResponseEntityGenerator.onSuccess()
     }
 
     @PostMapping("/info-verify")
-    @SwaggerExceptionResponses(exceptions = [ExistNameException::class, ExistMemberException::class, NeedEmailAuthException::class, NotExistDomainException::class,
-        NoSuchKeyException::class, InvalidETagException::class])
-    @Operation(summary = "회원가입 요청 API", description = "모든 회원가입이 과정이 끝나고 실제 회원을 등록할 때 사용하는 API입니다." +
-            "<br>앞선 과정에서 인증한 정보도 한번 더 검증하는 과정을 거칩니다." +
-            "<br>필수 파라미터 : nickName, eMail" +
-            "<br>선택적 파라미터 : profile, major, grade, introduction" +
-            "<br>major의 경우 별다른 입력이 없었다면(RequestBody에 포함되지 않았다면) 중고거래학과로 자동 할당하게 해두었습니다.")
-    fun registerRequest(@AuthenticationPrincipal userId : UUID, @RequestBody registerRequestDTO : RegisterRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun registerRequest(@AuthenticationPrincipal userId : UUID, @RequestBody registerRequestDTO : RegisterRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         memberService.registerMember(userId = userId, registerRequestDTO = registerRequestDTO)
 
         return ResponseEntityGenerator.onSuccess()

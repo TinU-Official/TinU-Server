@@ -1,5 +1,6 @@
 package com.tinuproject.tinu.domain.member.controller
 
+import com.tinuproject.tinu.domain.member.controller.docs.MemberSwaggerDocs
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.exception.ExistNameException
@@ -29,15 +30,11 @@ import java.util.*
 @RequestMapping("/api/user")
 class MemberController(
     val memberService: MemberService,
-) {
+) : MemberSwaggerDocs{
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
     @GetMapping()
-    @SwaggerExceptionResponses(exceptions = [NotExistMemberException::class])
-    @Operation(summary = "유저 정보 조회 API", description = "유저 정보 조회 API입니다." +
-            "<br>자기자신에대한 정보를 조회하고 싶다면 RequestParam을 비워주시면되고" +
-            "<br>다른 유저의 정보를 조회하고 싶다면 해당 User의 Id(UUID)를 RequstParam에 담아주시면 됩니다.")
-    fun requestUserInfo(@AuthenticationPrincipal userId : UUID, @RequestParam(name = "userId") searchUserId : UUID? ) : ResponseEntity<ResponseDTO<MemberSearchResponseDTO?>>{
+    override fun requestUserInfo(@AuthenticationPrincipal userId : UUID, @RequestParam(name = "userId") searchUserId : UUID? ) : ResponseEntity<ResponseDTO<MemberSearchResponseDTO?>>{
         val findUserId = searchUserId ?: userId
 
         return ResponseEntityGenerator.onSuccess(memberService.findMemberByUserId(
@@ -47,21 +44,14 @@ class MemberController(
     }
 
     @PutMapping()
-    @SwaggerExceptionResponses(exceptions = [NotExistMemberException::class, ExistNameException::class, NoSuchKeyException::class, InvalidETagException::class])
-    @Operation(summary = "유저 정보 갱신 API", description = "유저 정보를 갱신하는 API입니다." +
-            "<br>필수 파라미터 : nickName, <br>선택적(nullable) 파라미터 : introduction, major, grade,profile " +
-            "<br>업데이트되는 정보 + 유지되는 정보 모두 함께 보내주시면 되겠습니다.")
-    fun requestUpdateUserInfo(@AuthenticationPrincipal userId: UUID, @RequestBody updateUserInfoRequestDTO: UpdateUserInfoRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun requestUpdateUserInfo(@AuthenticationPrincipal userId: UUID, @RequestBody updateUserInfoRequestDTO: UpdateUserInfoRequestDTO) : ResponseEntity<ResponseDTO<NullResponse?>>{
         memberService.updateMember(userId, updateUserInfoRequestDTO)
 
         return ResponseEntityGenerator.onSuccess()
     }
 
     @GetMapping("/is-login")
-    @SwaggerExceptionResponses(exceptions = [ExpiredTokenException::class, InvalidedTokenException::class, NotFoundTokenException::class, NeedRegistException::class])
-    @Operation(summary = "유저 로그인 여부 확인 API", description = "유저가 로그인 상태인지 확인하는 API입니다." +
-            "<br>토큰의 유효성을 검사하고 회원가입 여부를 확인하여 예외를 던져줍니다.")
-    fun requestIsLogin(@AuthenticationPrincipal userId : UUID):ResponseEntity<ResponseDTO<NullResponse?>>{
+    override fun requestIsLogin(@AuthenticationPrincipal userId : UUID):ResponseEntity<ResponseDTO<NullResponse?>>{
         return ResponseEntityGenerator.onSuccess()
     }
 }
