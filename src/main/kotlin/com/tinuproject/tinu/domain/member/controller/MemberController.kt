@@ -25,7 +25,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@Tag( name = "사용자 API",description = "사용자의 정보와 관련한 API입니다.")
 @RestController
 @RequestMapping("/api/user")
 class MemberController(
