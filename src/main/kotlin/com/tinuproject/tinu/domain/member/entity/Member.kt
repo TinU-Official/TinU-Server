@@ -4,7 +4,7 @@ import com.tinuproject.tinu.global.entity.BaseEntity
 import com.tinuproject.tinu.domain.member.enums.Social
 import com.tinuproject.tinu.domain.member.service.dto.input.UpdateUserInputDTO
 import com.tinuproject.tinu.domain.university.entity.University
-import com.tinuproject.tinu.domain.chat.entity.Chat
+import com.tinuproject.tinu.domain.chat.entity.ChatRoom
 import com.tinuproject.tinu.domain.post.entity.Post
 import com.tinuproject.tinu.domain.post.entity.Scrap
 import jakarta.persistence.*
@@ -59,12 +59,12 @@ class Member (
     @OneToMany(fetch = FetchType.LAZY,
         cascade = [CascadeType.REMOVE],
         mappedBy = "buyer")
-    var buyerChat : MutableList<Chat> = mutableListOf(),
+    var buyerChatRoom: MutableList<ChatRoom> = mutableListOf(),
 
     @OneToMany(fetch = FetchType.LAZY,
         cascade = [CascadeType.REMOVE],
         mappedBy = "seller")
-    var sellerChat : MutableList<Chat> = mutableListOf(),
+    var sellerChatRoom: MutableList<ChatRoom> = mutableListOf(),
 
     @OneToMany(fetch = FetchType.LAZY,
         cascade = [CascadeType.REMOVE],
