@@ -44,7 +44,7 @@ class Post (
     var sellMethod : Set<SellMethod> = setOf(),
 
     @Column
-    var isSell : Boolean,
+    var isSoldOut : Boolean,
 
     @Column
     var isHide : Boolean = false,
