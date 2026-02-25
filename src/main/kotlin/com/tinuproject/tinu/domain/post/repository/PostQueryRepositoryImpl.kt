@@ -93,7 +93,7 @@ class PostQueryRepositoryImpl(
 
     override fun eqOnlySell(onlySell: Boolean): BooleanExpression? {
         return when (onlySell) {
-            true -> post.isSoldOut.eq(true)
+            true -> post.isSoldOut.eq(false)
             false -> null
         }
     }
