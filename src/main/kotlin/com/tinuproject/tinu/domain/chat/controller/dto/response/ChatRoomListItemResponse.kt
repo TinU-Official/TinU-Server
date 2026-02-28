@@ -31,5 +31,8 @@ data class ChatRoomListItemResponse(
     val myRole: ChatRole,
 
     @Schema(description = "상대방이 채팅방을 나갔는지 여부")
-    val opponentHasLeft: Boolean
+    val opponentHasLeft: Boolean,
+
+    @Schema(description = "내가 마지막으로 읽은 ChatText.id (상세 조회 cursor로 사용). null이면 아직 읽지 않음")
+    val lastReadChatId: Long?
 )

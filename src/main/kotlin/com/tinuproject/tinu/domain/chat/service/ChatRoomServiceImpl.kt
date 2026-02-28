@@ -1,7 +1,7 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListItemResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListItemResponse
 import com.tinuproject.tinu.domain.chat.enums.ChatRole
 import com.tinuproject.tinu.domain.chat.enums.ChatRoomFilter
 import com.tinuproject.tinu.domain.chat.enums.ChatType
@@ -65,7 +65,8 @@ class ChatRoomServiceImpl(
                 lastChatAt = raw.lastChatAt,
                 unreadCount = unreadCount,
                 myRole = if (raw.buyerId == member.id) ChatRole.BUYER else ChatRole.SELLER,
-                opponentHasLeft = raw.opponentDeletedAt != null
+                opponentHasLeft = raw.opponentDeletedAt != null,
+                lastReadChatId = raw.lastReadChatId
             )
         }
 
