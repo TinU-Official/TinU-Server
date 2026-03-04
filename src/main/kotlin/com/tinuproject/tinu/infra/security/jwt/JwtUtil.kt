@@ -2,143 +2,135 @@ package com.tinuproject.tinu.infra.security.jwt
 
 import com.tinuproject.tinu.domain.member.exception.ExpiredTokenException
 import com.tinuproject.tinu.domain.member.exception.InvalidedTokenException
-import com.tinuproject.tinu.domain.member.exception.NotFoundTokenException
-import org.slf4j.Logger
+import com.tinuproject.tinu.domain.member.exception.UnknownTokenException
+import io.jsonwebtoken.*
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
 import java.security.SignatureException
 import java.util.*
 import javax.crypto.SecretKey
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
-import jakarta.servlet.http.HttpServletRequest
-import org.springframework.http.HttpHeaders
+import org.jetbrains.annotations.TestOnly
 
 
 @Component
-class JwtUtil {
-    var log : Logger = LoggerFactory.getLogger(this::class.java)
-    @Value("\${jwt.secret}")
-    lateinit var SECRET_KEY : String
+class JwtUtil(
 
-    private fun getSigningKey(): SecretKey {
-        val keyBytes = Decoders.BASE64.decode(SECRET_KEY)
+    private val jwtProperties: JwtProperties,
+
+) {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
+    private fun getSigningKey(secretKey: String): SecretKey {
+        val keyBytes = Decoders.BASE64.decode(secretKey)
         return Keys.hmacShaKeyFor(keyBytes)
     }
 
-    // 액세스 토큰을 발급하는 메서드
-    fun generateAccessToken(uuid: UUID, expirationMillis: Long, isSign : Boolean): String {
-        log.info("액세스 토큰 발행.")
+    /* =======================
+       Token Generate
+       ======================= */
+
+    fun generateAccessToken(
+        uuid: UUID,
+        isSign: Boolean
+    ): String {
+        log.info("액세스 토큰 발행")
+
+        val props = jwtProperties.accessToken
+
         return Jwts.builder()
-            .claim("userId", uuid.toString())// 클레임에 userId 추가
-            .claim("isSign", isSign)// 클레임에 회원가입 여부 추가.
+            .claim("userId", uuid.toString())
+            .claim("isSign", isSign)
             .setIssuedAt(Date())
-            .setExpiration(Date(System.currentTimeMillis() + expirationMillis))
-            .signWith(getSigningKey())
+            .setExpiration(Date(System.currentTimeMillis() + props.expirationTime))
+            .signWith(getSigningKey(props.secret))
             .compact()
     }
 
-    // 리프레쉬 토큰을 발급하는 메서드
-    fun generateRefreshToken(uuid : UUID, expirationMillis: Long): String {
-        log.info("리프레쉬 토큰 발행.")
+    @TestOnly
+    fun generateAccessToken(
+        uuid: UUID,
+        expirationMillis : Long,
+        isSign: Boolean
+    ) : String{
+        log.info("액세스 토큰 발행")
+
+        val props = jwtProperties.accessToken
+
         return Jwts.builder()
-            .claim("userId", uuid.toString()) // 클레임에 userId 추가
+            .claim("userId", uuid.toString())
+            .claim("isSign", isSign)
             .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + expirationMillis))
-            .signWith(getSigningKey())
+            .signWith(getSigningKey(props.secret))
             .compact()
     }
 
-    // 응답 헤더에서 액세스 토큰을 반환하는 메서드
-    fun getTokenFromHeader(httpServletRequest: HttpServletRequest): String {
-        val authorizationHeader = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
-        //hasText(token)토큰이 넘어왔는지 확인
-        if(StringUtils.hasText(authorizationHeader))
-            return authorizationHeader.substring(7)
-        else
-            throw NotFoundTokenException()
+    fun generateRefreshToken(): String {
+        log.info("리프레시 토큰 발행")
+
+        val props = jwtProperties.refreshToken
+
+        return Jwts.builder()
+            .setIssuedAt(Date())
+            .setExpiration(Date(System.currentTimeMillis() + props.expirationTime))
+            .signWith(getSigningKey(props.secret))
+            .compact()
     }
 
-    // 토큰에서 유저 id를 반환하는 메서드
-    fun getUserIdFromToken(token: String?): String {
-        return try {
-            val userId: String = getClaimsFromToken(token)
-                .get("userId", String::class.java)
-            log.info("유저 id 반환")
-            userId
-        } catch (e: JwtException) {
-            // 토큰이 유효하지 않은 경우
-            log.warn("유효하지 않은 토큰입니다.")
-            //(토큰이 유효하지 않는 경우 반환하는 Exception을 만들어 처리)
-            throw InvalidedTokenException()
-        } catch (e: IllegalArgumentException) {
-            log.warn("유효하지 않은 토큰입니다.")
-            //(토큰이 유효하지 않는 경우 반환하는 Exception을 만들어 처리)
-            throw InvalidedTokenException()
-        }
-    }
+    /* =======================
+       Token Validate
+       ======================= */
 
-    //Token 에서 claim 반환하는 메서드
-    fun getClaimsFromToken(token : String?) : Claims{
-        try{
+    private fun validateToken(
+        token: String,
+        secretKey: SecretKey
+    ): Jws<Claims> {
+        try {
             return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
-                .body
-        }catch(e : SignatureException){
-            log.warn("Claim이 유효하지 않은 토큰입니다.{}",e.message)
-            throw e
-        }catch(e : ExpiredJwtException){
-            log.warn("토큰이 만료되었습니다.")
-            throw e
-        }
-        catch (e : Exception){
-            log.warn("토큰과 관련한 예기치 못한 에러가 발생했습니다{}.",e.message)
-            throw Exception()
-        }
-    }
 
-    //토큰이 유효한지 확인
-    fun validateToken(token : String){
-        //parseClamisJWS에서 발생하는 예외를
-        //본 프로젝트에서의 예외로 변경.
-        try{
-            Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-        }catch (e : SignatureException){
+        } catch (e: SignatureException) {
+            log.info("토큰 시그니처가 유효하지 않습니다.")
             throw InvalidedTokenException()
-        }catch (e : ExpiredJwtException){
+
+        } catch (e: ExpiredJwtException) {
+            log.info("토큰이 만료되었습니다.")
             throw ExpiredTokenException()
-        }catch (e : Exception){
-            throw Exception()
-        }
-    }
 
-    fun signCheck(token : String) :Boolean{
-        return try {
-            val isSign : Boolean = getClaimsFromToken(token)["isSign"].toString().toBoolean()
-            isSign
         } catch (e: JwtException) {
-            // 토큰이 유효하지 않은 경우
-            log.warn("유효하지 않은 토큰입니다.")
-            //(토큰이 유효하지 않는 경우 반환하는 Exception을 만들어 처리)
-            throw InvalidedTokenException()
-        } catch (e: IllegalArgumentException) {
-            log.warn("유효하지 않은 토큰입니다.")
-            //(토큰이 유효하지 않는 경우 반환하는 Exception을 만들어 처리)
-            throw InvalidedTokenException()
+            log.info("토큰에 예기치 못한 문제가 존재합니다.")
+            throw UnknownTokenException()
         }
     }
 
+    fun parseAccessToken(token: String): Jws<Claims> =
+        validateToken(
+            token,
+            getSigningKey(jwtProperties.accessToken.secret)
+        )
 
+    fun parseRefreshToken(token: String): Jws<Claims> =
+        validateToken(
+            token,
+            getSigningKey(jwtProperties.refreshToken.secret)
+        )
 
+    /* =======================
+       Claims
+       ======================= */
+
+    fun getClaimsFromAccessToken(token: String): Claims =
+        parseAccessToken(token).body
+
+    fun getUserIdFromClaims(claims: Claims): String =
+        claims["userId"]?.toString()
+            ?: throw UnknownTokenException()
+
+    fun isSigned(claims: Claims): Boolean =
+        claims["isSign"]?.toString()?.toBoolean()
+            ?: throw UnknownTokenException()
 }

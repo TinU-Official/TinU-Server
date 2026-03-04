@@ -12,9 +12,11 @@ import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
+import org.springframework.context.annotation.Profile
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
+@Profile("!test")
 @Configuration
 @EnableAspectJAutoProxy
 class SwaggerConfig(val swaggerExceptionResponseAdaptor: SwaggerExceptionResponseAdaptor) :WebMvcConfigurer{

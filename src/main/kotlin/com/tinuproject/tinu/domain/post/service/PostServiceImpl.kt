@@ -88,7 +88,7 @@ class PostServiceImpl(
                 thumbnail = post.thumbnail,
                 isLike = post.id in scrapPostIds,
                 likeCount = post.likeCount,
-                isSell = post.isSell
+                isSoldOut = post.isSoldOut
             )
         }
 
@@ -126,7 +126,7 @@ class PostServiceImpl(
                 price = post.price,
                 sellMethod = post.sellMethod.toSet(),
                 paymentMethod = post.paymentMethod.toSet(),
-                isSell = post.isSell,
+                isSoldOut = post.isSoldOut,
                 isLike = member.scrap.any { it.post == post },
                 likeCount = post.scrapCount,
                 isWriter = member == post.author,
@@ -165,7 +165,7 @@ class PostServiceImpl(
                 category = category,
                 price = postCreateRequest.price,
                 sellMethod = postCreateRequest.sellMethod,
-                isSell = true,
+                isSoldOut = false,
                 isHide = false,
                 paymentMethod = postCreateRequest.paymentMethod,
                 thumbnail = urlList.firstOrNull(),
@@ -314,7 +314,7 @@ class PostServiceImpl(
     }
 
     @Transactional
-    override fun updatePostStatus(userId: UUID, postId: Long, isSell: Boolean) {
+    override fun updatePostStatus(userId: UUID, postId: Long, isSoldOut: Boolean) {
 
         log.info("게시글 검증")
         val post = postRepository.findPostById(postId)
@@ -323,7 +323,7 @@ class PostServiceImpl(
         if (userId != post.author.userId)
             throw AuthorNotMatchException()
 
-        post.isSell = isSell
+        post.isSoldOut = isSoldOut
         postRepository.save(post)
     }
 

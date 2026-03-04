@@ -17,7 +17,7 @@ object TestPostFactory {
                 buyer = buyer,
                 category = category,
                 price = 100,
-                isSell = true,
+                isSoldOut = false,
                 thumbnail = null
             )
         )
