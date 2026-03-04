@@ -29,7 +29,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/custom-filter")
-@Tag(name="커스텀 필터 API", description = "커스텀 필터와 관련한 API입니다.")
 class CustomFilterController(
     private val customFilterService: CustomFilterService
 ) : CustomFilterSwaggerDocs {

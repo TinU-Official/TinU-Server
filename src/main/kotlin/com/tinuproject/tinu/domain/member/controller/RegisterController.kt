@@ -28,7 +28,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-@Tag( name = "회원가입 관련 API",description = "회원가입 로직 중 사용되는 API들입니다.")
 @RestController
 @RequestMapping("/api/register")
 class RegisterController(

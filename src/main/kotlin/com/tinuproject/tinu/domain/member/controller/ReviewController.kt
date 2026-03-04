@@ -21,7 +21,6 @@ import java.util.*
 
 @RestController
 @RequestMapping("api/reviews")
-@Tag(name="리뷰(거래 이후 평가) API", description = "리뷰(거래 이후 평가) 관련 API입니다.")
 class ReviewController(
     private val reviewService: ReviewService
 ) : ReviewSwaggerDocs {
