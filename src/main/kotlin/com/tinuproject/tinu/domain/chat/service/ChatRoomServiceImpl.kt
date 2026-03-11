@@ -19,6 +19,7 @@ import com.tinuproject.tinu.domain.chat.repository.ChatRoomMemberRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatRoomQueryRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatRoomRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
+import com.tinuproject.tinu.domain.member.entity.Member
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
 import com.tinuproject.tinu.domain.post.exception.PostNotFoundException
@@ -51,7 +52,7 @@ class ChatRoomServiceImpl(
 
         val (cursorChatRoomId, cursorLastChatAt) = resolveCursor(cursorId)
 
-        var rawList = chatRoomQueryRepository.findChatRoomList(
+        val rawAll = chatRoomQueryRepository.findChatRoomList(
             memberId = member.id!!,
             filter = filter,
             cursorChatRoomId = cursorChatRoomId,
@@ -59,8 +60,8 @@ class ChatRoomServiceImpl(
             size = actualSize + 1
         )
 
-        val hasNext = rawList.size > actualSize
-        if (hasNext) rawList = rawList.subList(0, actualSize)
+        val hasNext = rawAll.size > actualSize
+        val rawList = if (hasNext) rawAll.subList(0, actualSize) else rawAll
 
         // 안 읽은 개수: lastReadChatId → ChatText.order 배치 조회
         // unreadCount = maxOrder - lastReadOrder (order는 1부터 시작하는 채팅방 내 순차 번호)
@@ -117,9 +118,8 @@ class ChatRoomServiceImpl(
         val existingRoom = chatRoomRepository.findByBuyerAndSellerAndPost(buyer, seller, post)
         if (existingRoom != null) {
             val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(buyer, existingRoom)
-                ?: chatRoomMemberRepository.findByMemberAndChatRoom(seller, existingRoom)
                 ?: throw ChatRoomMemberNotFoundException()
-            if (myCrm.member.id == buyer.id && myCrm.deletedAt != null) {
+            if (myCrm.deletedAt != null) {
                 myCrm.deletedAt = null
             }
             return CreateChatRoomResponse(chatRoomId = existingRoom.id!!, created = false)
@@ -137,15 +137,7 @@ class ChatRoomServiceImpl(
         userId: UUID,
         chatRoomId: Long
     ): ChatRoomInfoResponse {
-        val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
-        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
-
-        val isBuyer = chatRoom.buyer.id == member.id
-        val isSeller = chatRoom.seller.id == member.id
-        if (!isBuyer && !isSeller) throw ForbiddenException()
-
-        val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
-            ?: throw ChatRoomMemberNotFoundException()
+        val (_, chatRoom, myCrm, isBuyer) = resolveChatRoomAccess(userId, chatRoomId)
         if (myCrm.deletedAt != null) throw ChatRoomNotFoundException()
 
         val opponent = if (isBuyer) chatRoom.seller else chatRoom.buyer
@@ -174,15 +166,7 @@ class ChatRoomServiceImpl(
         chatRoomId: Long,
         request: MarkAsReadRequest
     ) {
-        val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
-        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
-
-        val isBuyer = chatRoom.buyer.id == member.id
-        val isSeller = chatRoom.seller.id == member.id
-        if (!isBuyer && !isSeller) throw ForbiddenException()
-
-        val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
-            ?: throw ChatRoomMemberNotFoundException()
+        val (_, _, myCrm, _) = resolveChatRoomAccess(userId, chatRoomId)
         if (myCrm.deletedAt != null) throw ChatRoomNotFoundException()
 
         val newChatText = chatTextRepository.findById(request.lastReadChatId).orElse(null)
@@ -190,12 +174,10 @@ class ChatRoomServiceImpl(
             throw ChatReadInvalidCursorException()
         }
 
-        val currentLastReadOrder = myCrm.lastReadChatId
-            ?.let { chatTextRepository.findById(it).orElse(null)?.order }
-            ?: 0L
-        if (newChatText.order <= currentLastReadOrder) return
+        if (newChatText.order <= myCrm.lastReadChatOrder) return
 
         myCrm.lastReadChatId = request.lastReadChatId
+        myCrm.lastReadChatOrder = newChatText.order
     }
 
     @Transactional
@@ -203,19 +185,31 @@ class ChatRoomServiceImpl(
         userId: UUID,
         chatRoomId: Long
     ) {
+        val (_, _, myCrm, _) = resolveChatRoomAccess(userId, chatRoomId)
+        if (myCrm.deletedAt != null) return
+        myCrm.deletedAt = LocalDateTime.now()
+    }
+
+    private data class ChatRoomAccess(
+        val member: Member,
+        val chatRoom: ChatRoom,
+        val myCrm: ChatRoomMember,
+        val isBuyer: Boolean
+    )
+
+    /**
+     * 공통 접근 제어: member 조회 → chatRoom 조회 → buyer/seller 확인(403) → myCrm 조회(404)
+     * deletedAt 체크는 호출자가 직접 처리 (leaveChatRoom은 멱등, 나머지는 404)
+     */
+    private fun resolveChatRoomAccess(userId: UUID, chatRoomId: Long): ChatRoomAccess {
         val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
         val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
-
         val isBuyer = chatRoom.buyer.id == member.id
         val isSeller = chatRoom.seller.id == member.id
         if (!isBuyer && !isSeller) throw ForbiddenException()
-
         val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
             ?: throw ChatRoomMemberNotFoundException()
-
-        if (myCrm.deletedAt != null) return
-
-        myCrm.deletedAt = LocalDateTime.now()
+        return ChatRoomAccess(member, chatRoom, myCrm, isBuyer)
     }
 
     /**

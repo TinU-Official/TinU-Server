@@ -99,7 +99,7 @@ class ChatRoomDetailServiceImpl(
             .map { (date, items) ->
                 ChatMessageGroupByDateDto(
                     date = date,
-                    items = items.sortedBy { it.order }.map { chatText ->
+                    items = items.map { chatText ->
                         ChatMessageItemDto(
                             id = chatText.id!!,
                             text = chatText.text,
@@ -133,5 +133,5 @@ class ChatRoomDetailServiceImpl(
     }
 
     private fun toKst(chatText: ChatText): ZonedDateTime =
-        chatText.createdAt!!.atZone(ZoneId.systemDefault()).withZoneSameInstant(KST)
+        chatText.createdAt!!.atZone(KST)
 }

@@ -39,6 +39,14 @@ class ChatRoomMember(
     var lastReadChatId: Long? = null,
 
     /**
+     * 마지막으로 읽은 ChatText의 order 캐시.
+     * lastReadChatId 변경 시 함께 갱신하여 역행 방지 체크 시 DB 재조회를 제거한다.
+     * 0 = 아직 한 번도 읽지 않음.
+     */
+    @Column(nullable = false)
+    var lastReadChatOrder: Long = 0L,
+
+    /**
      * Soft Delete - 채팅방 나가기 시점.
      * null이 아니면 이 멤버가 채팅방을 나간 상태.
      * - 나간 멤버: 목록에서 해당 채팅방 미노출

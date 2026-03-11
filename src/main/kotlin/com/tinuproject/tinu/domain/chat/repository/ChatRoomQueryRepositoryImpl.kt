@@ -67,6 +67,7 @@ class ChatRoomQueryRepositoryImpl(
                 myCRM.chatRoom.eq(chatRoom)
                     .and(myCRM.member.id.eq(memberId))
             )
+            // 채팅방에는 판매자, 구매자 2명만 존재할 수 있음. 더 늘어날 일 없음.
             .leftJoin(opponentCRM).on(
                 opponentCRM.chatRoom.eq(chatRoom)
                     .and(opponentCRM.member.id.ne(memberId))
