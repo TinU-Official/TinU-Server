@@ -1,14 +1,16 @@
 package com.tinuproject.tinu.domain.chat.controller
 
 import com.tinuproject.tinu.domain.chat.controller.dto.request.ChatDetailRequest
+import com.tinuproject.tinu.domain.chat.controller.dto.request.CreateChatRoomRequest
+import com.tinuproject.tinu.domain.chat.controller.dto.request.MarkAsReadRequest
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomInfoResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatRoomResponse
 import com.tinuproject.tinu.domain.chat.enums.ChatDetailDirection
 import com.tinuproject.tinu.domain.chat.enums.ChatRoomFilter
-import com.tinuproject.tinu.domain.chat.exception.ChatRoomNotFoundException
 import com.tinuproject.tinu.domain.chat.service.ChatRoomDetailService
 import com.tinuproject.tinu.domain.chat.service.ChatRoomService
-import com.tinuproject.tinu.global.exception.ForbiddenException
 import com.tinuproject.tinu.global.response.ResponseEntityGenerator
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
@@ -16,7 +18,10 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -51,6 +56,24 @@ class ChatRoomController(
         )
     }
 
+    @GetMapping("/{chatRoomId}")
+    @Operation(
+        summary = "채팅방 정보 조회",
+        description = """
+            채팅방 헤더 정보를 조회합니다.
+            - 상대방 닉네임, 프로필 이미지, 상품 정보(제목, 가격, 썸네일, 판매 상태) 반환
+            - opponentHasLeft: 상대방이 채팅방을 나간 경우 true
+        """
+    )
+    fun getChatRoomInfo(
+        @AuthenticationPrincipal userId: UUID,
+        @PathVariable chatRoomId: Long
+    ): ResponseEntity<ResponseDTO<ChatRoomInfoResponse?>> {
+        return ResponseEntityGenerator.onSuccess(
+            chatRoomService.getChatRoomInfo(userId, chatRoomId)
+        )
+    }
+
     @GetMapping("/{chatRoomId}/messages")
     @Operation(
         summary = "채팅 상세 조회",
@@ -73,5 +96,61 @@ class ChatRoomController(
         return ResponseEntityGenerator.onSuccess(
             chatRoomDetailService.getChatDetail(userId, chatRoomId, request)
         )
+    }
+
+    @PostMapping
+    @Operation(
+        summary = "채팅방 생성/입장",
+        description = """
+            상품에 대해 판매자와 1:1 채팅방을 생성하거나 기존 채팅방에 입장합니다.
+            - created: true이면 새로 생성, false이면 기존 채팅방 재입장
+            - 자기 자신의 상품에 채팅을 보낼 수 없습니다 (400)
+            - 나갔던 채팅방에 재입장하면 이전 메시지 포함 복원됩니다
+        """
+    )
+    fun createChatRoom(
+        @AuthenticationPrincipal userId: UUID,
+        @RequestBody request: CreateChatRoomRequest
+    ): ResponseEntity<ResponseDTO<CreateChatRoomResponse?>> {
+        return ResponseEntityGenerator.onSuccess(
+            chatRoomService.createOrEnterChatRoom(userId, request),
+            201
+        )
+    }
+
+    @PatchMapping("/{chatRoomId}/leave")
+    @Operation(
+        summary = "채팅방 나가기",
+        description = """
+            채팅방을 나갑니다 (soft delete).
+            - 나간 사용자: 채팅 목록에서 해당 채팅방 미노출
+            - 상대방: opponentHasLeft=true로 표시되며 채팅 전송 불가
+            - 이미 나간 채팅방에 재요청 시 정상 응답 (멱등)
+        """
+    )
+    fun leaveChatRoom(
+        @AuthenticationPrincipal userId: UUID,
+        @PathVariable chatRoomId: Long
+    ): ResponseEntity<ResponseDTO<Void?>> {
+        chatRoomService.leaveChatRoom(userId, chatRoomId)
+        return ResponseEntityGenerator.onSuccess()
+    }
+
+    @PatchMapping("/{chatRoomId}/read")
+    @Operation(
+        summary = "읽음 처리",
+        description = """
+            채팅방의 lastReadChatId를 업데이트합니다.
+            - lastReadChatId: 마지막으로 읽은 ChatText의 id
+            - 현재 읽음 커서보다 이전 메시지를 커서로 전달 시 무시 (역행 방지)
+        """
+    )
+    fun markAsRead(
+        @AuthenticationPrincipal userId: UUID,
+        @PathVariable chatRoomId: Long,
+        @RequestBody request: MarkAsReadRequest
+    ): ResponseEntity<ResponseDTO<Void?>> {
+        chatRoomService.markAsRead(userId, chatRoomId, request)
+        return ResponseEntityGenerator.onSuccess()
     }
 }

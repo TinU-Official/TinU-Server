@@ -1,23 +1,42 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.request.CreateChatRoomRequest
+import com.tinuproject.tinu.domain.chat.controller.dto.request.MarkAsReadRequest
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomInfoResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListItemResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListResponse
+import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatRoomResponse
+import com.tinuproject.tinu.domain.chat.entity.ChatRoom
+import com.tinuproject.tinu.domain.chat.entity.ChatRoomMember
 import com.tinuproject.tinu.domain.chat.enums.ChatRole
 import com.tinuproject.tinu.domain.chat.enums.ChatRoomFilter
 import com.tinuproject.tinu.domain.chat.enums.ChatType
+import com.tinuproject.tinu.domain.chat.exception.ChatReadInvalidCursorException
+import com.tinuproject.tinu.domain.chat.exception.ChatRoomMemberNotFoundException
+import com.tinuproject.tinu.domain.chat.exception.ChatRoomNotFoundException
+import com.tinuproject.tinu.domain.chat.exception.ChatSelfChatException
+import com.tinuproject.tinu.domain.chat.repository.ChatRoomMemberRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatRoomQueryRepository
+import com.tinuproject.tinu.domain.chat.repository.ChatRoomRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
+import com.tinuproject.tinu.domain.post.exception.PostNotFoundException
+import com.tinuproject.tinu.domain.post.repository.PostRepository
+import com.tinuproject.tinu.global.exception.ForbiddenException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class ChatRoomServiceImpl(
     private val memberRepository: MemberRepository,
     private val chatRoomQueryRepository: ChatRoomQueryRepository,
-    private val chatTextRepository: ChatTextRepository
+    private val chatTextRepository: ChatTextRepository,
+    private val chatRoomRepository: ChatRoomRepository,
+    private val chatRoomMemberRepository: ChatRoomMemberRepository,
+    private val postRepository: PostRepository
 ) : ChatRoomService {
 
     @Transactional(readOnly = true)
@@ -82,6 +101,121 @@ class ChatRoomServiceImpl(
             size = items.size,
             nextCursorId = nextCursorId
         )
+    }
+
+    @Transactional
+    override fun createOrEnterChatRoom(
+        userId: UUID,
+        request: CreateChatRoomRequest
+    ): CreateChatRoomResponse {
+        val buyer = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
+        val post = postRepository.findPostById(request.postId) ?: throw PostNotFoundException()
+        val seller = post.author
+
+        if (buyer.id == seller.id) throw ChatSelfChatException()
+
+        val existingRoom = chatRoomRepository.findByBuyerAndSellerAndPost(buyer, seller, post)
+        if (existingRoom != null) {
+            val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(buyer, existingRoom)
+                ?: chatRoomMemberRepository.findByMemberAndChatRoom(seller, existingRoom)
+                ?: throw ChatRoomMemberNotFoundException()
+            if (myCrm.member.id == buyer.id && myCrm.deletedAt != null) {
+                myCrm.deletedAt = null
+            }
+            return CreateChatRoomResponse(chatRoomId = existingRoom.id!!, created = false)
+        }
+
+        val chatRoom = chatRoomRepository.save(ChatRoom(buyer = buyer, seller = seller, post = post))
+        chatRoomMemberRepository.save(ChatRoomMember(member = buyer, chatRoom = chatRoom))
+        chatRoomMemberRepository.save(ChatRoomMember(member = seller, chatRoom = chatRoom))
+
+        return CreateChatRoomResponse(chatRoomId = chatRoom.id!!, created = true)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getChatRoomInfo(
+        userId: UUID,
+        chatRoomId: Long
+    ): ChatRoomInfoResponse {
+        val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
+        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
+
+        val isBuyer = chatRoom.buyer.id == member.id
+        val isSeller = chatRoom.seller.id == member.id
+        if (!isBuyer && !isSeller) throw ForbiddenException()
+
+        val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
+            ?: throw ChatRoomMemberNotFoundException()
+        if (myCrm.deletedAt != null) throw ChatRoomNotFoundException()
+
+        val opponent = if (isBuyer) chatRoom.seller else chatRoom.buyer
+        val opponentCrm = chatRoomMemberRepository.findByMemberAndChatRoom(opponent, chatRoom)
+        val opponentHasLeft = opponentCrm?.deletedAt != null
+
+        val post = chatRoom.post
+        return ChatRoomInfoResponse(
+            chatRoomId = chatRoom.id!!,
+            opponentNickname = opponent.nickname ?: "",
+            opponentProfileImageURL = opponent.profileImageURL,
+            opponentMemberId = opponent.id!!,
+            postId = post.id!!,
+            postTitle = post.title,
+            postPrice = post.price,
+            postThumbnail = post.thumbnail,
+            postIsSell = post.isSell,
+            opponentHasLeft = opponentHasLeft,
+            myRole = if (isBuyer) ChatRole.BUYER else ChatRole.SELLER
+        )
+    }
+
+    @Transactional
+    override fun markAsRead(
+        userId: UUID,
+        chatRoomId: Long,
+        request: MarkAsReadRequest
+    ) {
+        val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
+        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
+
+        val isBuyer = chatRoom.buyer.id == member.id
+        val isSeller = chatRoom.seller.id == member.id
+        if (!isBuyer && !isSeller) throw ForbiddenException()
+
+        val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
+            ?: throw ChatRoomMemberNotFoundException()
+        if (myCrm.deletedAt != null) throw ChatRoomNotFoundException()
+
+        val newChatText = chatTextRepository.findById(request.lastReadChatId).orElse(null)
+        if (newChatText == null || newChatText.chatRoom.id != chatRoomId) {
+            throw ChatReadInvalidCursorException()
+        }
+
+        val currentLastReadOrder = myCrm.lastReadChatId
+            ?.let { chatTextRepository.findById(it).orElse(null)?.order }
+            ?: 0L
+        if (newChatText.order <= currentLastReadOrder) return
+
+        myCrm.lastReadChatId = request.lastReadChatId
+    }
+
+    @Transactional
+    override fun leaveChatRoom(
+        userId: UUID,
+        chatRoomId: Long
+    ) {
+        val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
+        val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
+
+        val isBuyer = chatRoom.buyer.id == member.id
+        val isSeller = chatRoom.seller.id == member.id
+        if (!isBuyer && !isSeller) throw ForbiddenException()
+
+        val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
+            ?: throw ChatRoomMemberNotFoundException()
+
+        if (myCrm.deletedAt != null) return
+
+        myCrm.deletedAt = LocalDateTime.now()
     }
 
     /**
