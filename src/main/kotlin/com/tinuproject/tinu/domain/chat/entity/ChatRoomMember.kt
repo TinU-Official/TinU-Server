@@ -1,16 +1,17 @@
 package com.tinuproject.tinu.domain.chat.entity
 
+import com.tinuproject.tinu.domain.chat.enums.ChatRole
 import com.tinuproject.tinu.global.entity.BaseEntity
 import com.tinuproject.tinu.domain.member.entity.Member
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
 /**
- * 채팅방 참여 멤버 (buyer 또는 seller 1인).
- * 첫 메시지 전송 시 ChatRoom + buyer/seller 양쪽 ChatRoomMember 동시 생성.
+ * 채팅방 참여 멤버 (1인).
+ * 채팅방 생성 시 양쪽 ChatRoomMember 동시 생성.
  * @see JoinColumn(nullable = false): member, chatRoom은 필수. 스키마에 도메인 규칙 반영.
  * @see Index uk_chat_room_member: (member_id, chat_room_id) unique
- *      - 멤버별 채팅방 1개 보장, 내 채팅방 목록 필터(buyer = me OR seller = me)
+ *      - 멤버별 채팅방 1개 보장, 내 채팅방 목록 필터
  */
 @Entity
 @Table(
@@ -28,6 +29,11 @@ class ChatRoomMember(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_room_id", nullable = false)
     var chatRoom: ChatRoom,
+
+    /** 채팅방 내 역할 (BUYER 또는 SELLER). */
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    var role: ChatRole,
 
     /**
      * 마지막으로 읽은 ChatText의 id (커서).

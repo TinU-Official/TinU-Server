@@ -1,11 +1,12 @@
 package com.tinuproject.tinu.domain.chat.repository.dto
 
+import com.tinuproject.tinu.domain.chat.enums.ChatRole
 import com.tinuproject.tinu.domain.chat.enums.ChatType
 import java.time.LocalDateTime
 
 data class ChatRoomRawDto(
     val chatRoomId: Long,
-    val buyerId: Long,
+    val myRole: ChatRole,
     val postId: Long,
     val postTitle: String,
     val postThumbnail: String?,

@@ -84,7 +84,7 @@ class ChatRoomServiceImpl(
                 lastChatContent = if (raw.lastChatType == ChatType.IMAGE) "[사진]" else raw.lastChatText,
                 lastChatAt = raw.lastChatAt,
                 unreadCount = unreadCount,
-                myRole = if (raw.buyerId == member.id) ChatRole.BUYER else ChatRole.SELLER,
+                myRole = raw.myRole,
                 opponentHasLeft = raw.opponentDeletedAt != null,
                 lastReadChatId = raw.lastReadChatId
             )
@@ -115,19 +115,15 @@ class ChatRoomServiceImpl(
 
         if (buyer.id == seller.id) throw ChatSelfChatException()
 
-        val existingRoom = chatRoomRepository.findByBuyerAndSellerAndPost(buyer, seller, post)
-        if (existingRoom != null) {
-            val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(buyer, existingRoom)
-                ?: throw ChatRoomMemberNotFoundException()
-            if (myCrm.deletedAt != null) {
-                myCrm.deletedAt = null
-            }
-            return CreateChatRoomResponse(chatRoomId = existingRoom.id!!, created = false)
+        val existingCrm = chatRoomMemberRepository.findByMemberAndChatRoom_PostAndRole(buyer, post, ChatRole.BUYER)
+        if (existingCrm != null) {
+            if (existingCrm.deletedAt != null) existingCrm.deletedAt = null
+            return CreateChatRoomResponse(chatRoomId = existingCrm.chatRoom.id!!, created = false)
         }
 
-        val chatRoom = chatRoomRepository.save(ChatRoom(buyer = buyer, seller = seller, post = post))
-        chatRoomMemberRepository.save(ChatRoomMember(member = buyer, chatRoom = chatRoom))
-        chatRoomMemberRepository.save(ChatRoomMember(member = seller, chatRoom = chatRoom))
+        val chatRoom = chatRoomRepository.save(ChatRoom(post = post))
+        chatRoomMemberRepository.save(ChatRoomMember(member = buyer, chatRoom = chatRoom, role = ChatRole.BUYER))
+        chatRoomMemberRepository.save(ChatRoomMember(member = seller, chatRoom = chatRoom, role = ChatRole.SELLER))
 
         return CreateChatRoomResponse(chatRoomId = chatRoom.id!!, created = true)
     }
@@ -140,9 +136,11 @@ class ChatRoomServiceImpl(
         val (_, chatRoom, myCrm, isBuyer) = resolveChatRoomAccess(userId, chatRoomId)
         if (myCrm.deletedAt != null) throw ChatRoomNotFoundException()
 
-        val opponent = if (isBuyer) chatRoom.seller else chatRoom.buyer
-        val opponentCrm = chatRoomMemberRepository.findByMemberAndChatRoom(opponent, chatRoom)
-        val opponentHasLeft = opponentCrm?.deletedAt != null
+        val opponentRole = if (isBuyer) ChatRole.SELLER else ChatRole.BUYER
+        val opponentCrm = chatRoomMemberRepository.findByChatRoomAndRole(chatRoom, opponentRole)
+            ?: throw ChatRoomMemberNotFoundException()
+        val opponent = opponentCrm.member
+        val opponentHasLeft = opponentCrm.deletedAt != null
 
         val post = chatRoom.post
         return ChatRoomInfoResponse(
@@ -198,17 +196,15 @@ class ChatRoomServiceImpl(
     )
 
     /**
-     * 공통 접근 제어: member 조회 → chatRoom 조회 → buyer/seller 확인(403) → myCrm 조회(404)
+     * 공통 접근 제어: member 조회 → chatRoom 조회 → myCrm 조회(없으면 403) → role로 isBuyer 결정
      * deletedAt 체크는 호출자가 직접 처리 (leaveChatRoom은 멱등, 나머지는 404)
      */
     private fun resolveChatRoomAccess(userId: UUID, chatRoomId: Long): ChatRoomAccess {
         val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
         val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
-        val isBuyer = chatRoom.buyer.id == member.id
-        val isSeller = chatRoom.seller.id == member.id
-        if (!isBuyer && !isSeller) throw ForbiddenException()
         val myCrm = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
-            ?: throw ChatRoomMemberNotFoundException()
+            ?: throw ForbiddenException()
+        val isBuyer = myCrm.role == ChatRole.BUYER
         return ChatRoomAccess(member, chatRoom, myCrm, isBuyer)
     }
 

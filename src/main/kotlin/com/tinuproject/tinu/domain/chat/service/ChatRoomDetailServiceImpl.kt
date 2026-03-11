@@ -42,15 +42,10 @@ class ChatRoomDetailServiceImpl(
         val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
         val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
 
-        val isBuyer = chatRoom.buyer.id == member.id
-        val isSeller = chatRoom.seller.id == member.id
-
-        // 채팅방 미참여 → 403
-        if (!isBuyer && !isSeller) throw ForbiddenException()
-
-        // 내가 나간 채팅방 → 404 (목록에 없다고 처리)
+        // 채팅방 미참여 → 403, 내가 나간 채팅방 → 404 (목록에 없다고 처리)
         val myChatRoomMember = chatRoomMemberRepository.findByMemberAndChatRoom(member, chatRoom)
-        if (myChatRoomMember?.deletedAt != null) throw ChatRoomNotFoundException()
+            ?: throw ForbiddenException()
+        if (myChatRoomMember.deletedAt != null) throw ChatRoomNotFoundException()
 
         val actualSize = request.size.coerceIn(1, 100)
 

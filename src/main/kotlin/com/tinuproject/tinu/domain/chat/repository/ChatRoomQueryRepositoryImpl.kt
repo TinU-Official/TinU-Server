@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory
 import com.tinuproject.tinu.domain.chat.entity.QChatRoom
 import com.tinuproject.tinu.domain.chat.entity.QChatRoomMember
 import com.tinuproject.tinu.domain.chat.entity.QChatText
+import com.tinuproject.tinu.domain.chat.enums.ChatRole
 import com.tinuproject.tinu.domain.chat.enums.ChatRoomFilter
 import com.tinuproject.tinu.domain.chat.repository.dto.ChatRoomRawDto
 import com.tinuproject.tinu.domain.post.entity.QPost
@@ -45,7 +46,7 @@ class ChatRoomQueryRepositoryImpl(
                 Projections.constructor(
                     ChatRoomRawDto::class.java,
                     chatRoom.id,
-                    chatRoom.buyer.id,
+                    myCRM.role,
                     post.id,
                     post.title,
                     post.thumbnail,
@@ -73,7 +74,7 @@ class ChatRoomQueryRepositoryImpl(
                     .and(opponentCRM.member.id.ne(memberId))
             )
             .where(
-                filterCondition(memberId, filter),
+                filterCondition(filter),
                 myNotLeft(),
                 cursorCondition(cursorChatRoomId, cursorLastChatAt, lastChatText)
             )
@@ -82,12 +83,12 @@ class ChatRoomQueryRepositoryImpl(
             .fetch()
     }
 
-    /** 필터 조건: ALL=내가 buyer 또는 seller, PURCHASE=내가 buyer, SALE=내가 seller */
-    private fun filterCondition(memberId: Long, filter: ChatRoomFilter): BooleanExpression =
+    /** 필터 조건: ALL=myCRM join으로 이미 필터링됨, PURCHASE=내가 buyer, SALE=내가 seller */
+    private fun filterCondition(filter: ChatRoomFilter): BooleanExpression? =
         when (filter) {
-            ChatRoomFilter.ALL -> chatRoom.buyer.id.eq(memberId).or(chatRoom.seller.id.eq(memberId))
-            ChatRoomFilter.PURCHASE -> chatRoom.buyer.id.eq(memberId)
-            ChatRoomFilter.SALE -> chatRoom.seller.id.eq(memberId)
+            ChatRoomFilter.ALL -> null  // myCRM join으로 이미 memberId 필터링됨
+            ChatRoomFilter.PURCHASE -> myCRM.role.eq(ChatRole.BUYER)
+            ChatRoomFilter.SALE -> myCRM.role.eq(ChatRole.SELLER)
         }
 
     /** 나간 채팅방 제외: 내 ChatRoomMember가 없거나(마이그레이션) deletedAt이 null인 경우만 표시 */
