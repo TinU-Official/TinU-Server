@@ -3,14 +3,18 @@ package com.tinuproject.tinu.global.web
 import com.tinuproject.tinu.domain.member.exception.InvalidedTokenException
 import com.tinuproject.tinu.domain.member.exception.NotFoundTokenException
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
-object AccessTokenResolver : TokenResolver {
+@Component
+class AccessTokenResolver(
+    @param:Value("\${jwt.header.access-token}")
+    private val accessTokenHeaderName :String
 
-    private const val ACCESS_TOKEN_HEADER_NAME = "Authorization"
-    private const val BEARER_PREFIX = "Bearer "
+) : TokenResolver {
 
     override fun resolve(request: HttpServletRequest): String {
-        val header = request.getHeader(ACCESS_TOKEN_HEADER_NAME)
+        val header = request.getHeader(accessTokenHeaderName)
             ?: throw NotFoundTokenException()
 
         // prefix 체크와 토큰 추출을 동시에 처리
@@ -18,5 +22,9 @@ object AccessTokenResolver : TokenResolver {
             ?.removePrefix(BEARER_PREFIX)
             ?.trim()
             ?: throw InvalidedTokenException()
+    }
+
+    companion object {
+        private const val BEARER_PREFIX = "Bearer "
     }
 }
