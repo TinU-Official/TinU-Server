@@ -3,6 +3,7 @@ package com.tinuproject.tinu.global.web
 import com.tinuproject.tinu.domain.member.exception.InvalidedTokenException
 import com.tinuproject.tinu.domain.member.exception.NotFoundTokenException
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Component
 class AccessTokenResolver(
     @param:Value("\${jwt.header.access-token}")
     private val accessTokenHeaderName :String
-
 ) : TokenResolver {
 
+    private val  log = LoggerFactory.getLogger(this.javaClass)
+
     override fun resolve(request: HttpServletRequest): String {
+
         val header = request.getHeader(accessTokenHeaderName)
             ?: throw NotFoundTokenException()
 

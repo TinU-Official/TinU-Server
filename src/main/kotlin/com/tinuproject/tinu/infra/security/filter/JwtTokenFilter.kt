@@ -22,6 +22,8 @@ class JwtTokenFilter(
 
     val jwtUtil : JwtUtil,
 
+    val accessTokenResolver: AccessTokenResolver
+
 ) : OncePerRequestFilter(){
     var log : Logger = LoggerFactory.getLogger(this::class.java);
 
@@ -32,7 +34,7 @@ class JwtTokenFilter(
     ) {
         try {
             // 1. 토큰 추출 (여기서 토큰이 없어서 에러가 나거나 null이면 catch로 빠짐)
-            val accessToken: String = AccessTokenResolver.resolve(request)
+            val accessToken: String = accessTokenResolver.resolve(request)
 
             // 2. 토큰 파싱 및 검증 (만료, 위조 시 예외 발생 -> catch 이동)
             val claims = jwtUtil.getClaimsFromAccessToken(accessToken)

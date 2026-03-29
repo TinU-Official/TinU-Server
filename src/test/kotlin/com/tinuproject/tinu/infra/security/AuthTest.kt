@@ -98,7 +98,7 @@ class AuthTest (
         )
 
         mockMvc.get("/test/authenticated") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isUnauthorized() }
         }
@@ -114,7 +114,7 @@ class AuthTest (
         )
 
         mockMvc.get("/test/authenticated") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isUnauthorized() }
         }
@@ -129,7 +129,7 @@ class AuthTest (
         )
 
         mockMvc.get("/test/authenticated") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", token)
         }.andExpect {
             status { isUnauthorized() }
         }
@@ -144,7 +144,7 @@ class AuthTest (
         )
 
         mockMvc.get("/test/authenticated") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isUnauthorized() }
         }
@@ -156,7 +156,7 @@ class AuthTest (
         val token = jwtTokenFactory.generateAccessToken(isSign = true)
 
         mockMvc.get("/test/authenticated") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isOk() }
         }
@@ -168,7 +168,7 @@ class AuthTest (
         val token = jwtTokenFactory.generateAccessToken(isSign = true)
 
         mockMvc.get("/test/user") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isOk() }
             content { string("OK") }
@@ -181,7 +181,7 @@ class AuthTest (
         val token = jwtTokenFactory.generateAccessToken(isSign = false)
 
         mockMvc.get("/test/user") {
-            cookie(Cookie("access-token", token))
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isForbidden() }
         }

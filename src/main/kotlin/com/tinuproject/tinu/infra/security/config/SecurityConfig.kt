@@ -2,6 +2,7 @@ package com.tinuproject.tinu.infra.security.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
+import com.tinuproject.tinu.global.web.AccessTokenResolver
 import com.tinuproject.tinu.infra.security.filter.JwtTokenFilter
 import com.tinuproject.tinu.infra.security.handler.CustomAccessDeniedHandler
 import com.tinuproject.tinu.infra.security.handler.CustomAuthenticationEntryPoint
@@ -46,7 +47,8 @@ class SecurityConfig(
     private val oAuthLoginFailureHandler: OAuthLoginFailureHandler,
     private val customOAuth2UserService: CustomOAuth2UserService,
     private val customAuthenticationEntryPoint: AuthenticationEntryPoint,
-    private val customAccessDeniedHandler: AccessDeniedHandler
+    private val customAccessDeniedHandler: AccessDeniedHandler,
+    private val accessTokenResolver: AccessTokenResolver
 ) {
 
     @Bean
@@ -144,7 +146,7 @@ class SecurityConfig(
             }
 
             httpSecurity
-                .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil), UsernamePasswordAuthenticationFilter::class.java)
+                .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil,accessTokenResolver=accessTokenResolver), UsernamePasswordAuthenticationFilter::class.java)
 
         return httpSecurity.build()
 
