@@ -16,7 +16,7 @@ object AccessTokenResolver : TokenResolver {
         // prefix 체크와 토큰 추출을 동시에 처리
         return header.takeIf { it.startsWith(BEARER_PREFIX, ignoreCase = true) }
             ?.removePrefix(BEARER_PREFIX)
-            ?.trim() // 혹시 모를 앞뒤 공백 제거
+            ?.trim()
             ?: throw InvalidedTokenException()
     }
 }
