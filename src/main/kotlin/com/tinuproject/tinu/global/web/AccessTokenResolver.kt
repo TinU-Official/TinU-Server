@@ -1,18 +1,22 @@
 package com.tinuproject.tinu.global.web
 
+import com.tinuproject.tinu.domain.member.exception.InvalidedTokenException
 import com.tinuproject.tinu.domain.member.exception.NotFoundTokenException
 import jakarta.servlet.http.HttpServletRequest
 
 object AccessTokenResolver : TokenResolver {
 
-    private const val ACCESS_TOKEN_COOKIE_NAME = "access-token"
+    private const val ACCESS_TOKEN_HEADER_NAME = "Authorization"
+    private const val BEARER_PREFIX = "Bearer "
 
     override fun resolve(request: HttpServletRequest): String {
-        val cookies = request.cookies ?: throw NotFoundTokenException()
-
-        return cookies
-            .firstOrNull { it.name == ACCESS_TOKEN_COOKIE_NAME }
-            ?.value
+        val header = request.getHeader(ACCESS_TOKEN_HEADER_NAME)
             ?: throw NotFoundTokenException()
+
+        // prefix 체크와 토큰 추출을 동시에 처리
+        return header.takeIf { it.startsWith(BEARER_PREFIX, ignoreCase = true) }
+            ?.removePrefix(BEARER_PREFIX)
+            ?.trim() // 혹시 모를 앞뒤 공백 제거
+            ?: throw InvalidedTokenException()
     }
 }
