@@ -129,7 +129,7 @@ class AuthTest (
         )
 
         mockMvc.get("/test/authenticated") {
-            header("Authorization", token)
+            header("Authorization", "Bearer $token")
         }.andExpect {
             status { isUnauthorized() }
         }
