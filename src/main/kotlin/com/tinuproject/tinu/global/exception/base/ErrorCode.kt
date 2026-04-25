@@ -7,17 +7,22 @@ enum class ErrorCode(
     val stateCode : String?,
     val message :String
 ) {
+    //TOKEN 관련
     TOKEN_MISSING(httpStatusCode = 401, stateCode = "TOKEN_MISSING", message = "토큰이 존재하지 않습니다."),
     TOKEN_INVALIDED(httpStatusCode = 401, stateCode = "TOKEN_INVALIDED", message = "토큰이 유효하지 않습니다."),
     TOKEN_EXPIRED(httpStatusCode = 401, stateCode = "TOKEN_EXPIRED", message = "토큰이 만료되었습니다."),
+    TOKEN_UNRECOGNIZED(httpStatusCode = 401, stateCode = "TOKEN_UNRECOGNIZED", message = "토큰을 인식할 수 없습니다."),
 
+    //AUTH 관련
+    NEED_LOGIN(httpStatusCode = 401, stateCode = "NEED_LOGIN", message = "로그인을 진행해주세요."),
+    NEED_REISSUE_TOKEN(httpStatusCode = 401, stateCode =  "NEED_REFRESH_TOKEN", message = "토큰 재발행을 진행해주세요."),
 
     //멤버 관련
     MEMBER_EXIST_EMAIL(httpStatusCode = 409, stateCode="ALREADY_EXIST_EMAIL", message = "이미 사용중인 이메일입니다."),
     MEMBER_EXIST_NICKNAME(httpStatusCode = 409, stateCode = "ALREADY_EXIST_NICKNAME", message = "이미 사용중인 닉네임입니다."),
     MEMBER_NOT_EXIST(httpStatusCode = 404, stateCode = "NOT_FOUND_MEMBER", message = "요청하신 이용자는 없는 이용자입니다."),
     MEMBER_EXIST(httpStatusCode = 409, stateCode = "ALREADY_EXIST_MEMBER", message = "이미 회원가입이 진행된 계정입니다."),
-    MEMBER_NEED_REGIST(httpStatusCode = HttpStatus.UNAUTHORIZED.value(), stateCode = "MEMBER_NEED_REGIST", message = "회원가입이 완료되지 않은 사용자입니다."),
+    MEMBER_NEED_REGIST(httpStatusCode = 403, stateCode = "MEMBER_NEED_REGIST", message = "회원가입이 완료되지 않은 사용자입니다."),
 
     //회원가입 - 이메일 인증
     UNIVERSITY_NOT_EXIST_DOMAIN(httpStatusCode = 400, stateCode = "NOT_EXIST_DOMAIN", message = "현재 서비스를 지원하는 학교가 아닌 것 같습니다."),

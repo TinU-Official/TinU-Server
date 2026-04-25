@@ -1,0 +1,74 @@
+name: Open Issue
+on:
+  issues:
+    types:
+      - opened
+jobs:
+  open-issue:
+    permissions:
+      contents: write
+      issues: write
+    name: Open Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Issue Parser
+        uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+        with:
+          template-path: .github/ISSUE_TEMPLATE/feature.yml
+
+      - name: Log Issue Parser
+        run: |
+          echo '${{ steps.issue-parser.outputs.jsonString }}'
+          echo "checkbox : ${{ steps.issue-parser.outputs.issueparser_without_create_branch }}"
+
+      - name: Add Assignee to Issue
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'add-assignees'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          assignees: ${{ github.event.issue.user.login }}
+
+      - name: Check conditions and Create Branch
+        id: branch-step
+        run: |
+          CHECKBOX_VALUE="${{ steps.issue-parser.outputs.issueparser_without_create_branch }}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          BRANCH_NAME="issue/$ISSUE_NUMBER"
+          
+          if [[ -z "$CHECKBOX_VALUE" ]]; then
+            echo "Condition met: Creating branch $BRANCH_NAME"
+            echo "SHOULD_CREATE=true" >> $GITHUB_OUTPUT
+            echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          else
+            echo "Condition not met: Skipping branch creation"
+            echo "SHOULD_CREATE=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and Push Branch
+        if: steps.branch-step.outputs.SHOULD_CREATE == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git checkout -b ${{ steps.branch-step.outputs.BRANCH_NAME }}
+          git push origin ${{ steps.branch-step.outputs.BRANCH_NAME }}
+
+      - name: Link Branch to Issue
+        if: steps.branch-step.outputs.SHOULD_CREATE == 'true'
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            🚀 브랜치 생성됨: `${{ steps.branch-step.outputs.BRANCH_NAME }}`
+            이 브랜치에서 작업을 시작해 주세요!
+            ```bash
+            git fetch origin
+            git checkout ${{ steps.branch-step.outputs.BRANCH_NAME }}
+            ```

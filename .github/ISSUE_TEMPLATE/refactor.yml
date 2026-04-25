@@ -21,28 +21,10 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: branch
-    attributes:
-      label: '브랜치 이름은 무엇인가요?'
-      description: '브랜치 생성을 원치 않으시면 비워두세요.'
-      placeholder: 'chat-service'
-    validations:
-      required: false
-
   - type: checkboxes
-    id: without_jira_issue
+    id: without_create_branch
     attributes:
-      label: '지라 이슈를 제외할까요?'
-      description: '체크하면 지라 이슈와 티켓 넘버가 생성되지 않아요.'
+      label: '브랜치 생성을 생략할까요?'
+      description: '체크하면 브랜치가 자동으로 생성되지 않아요.'
       options:
-        - label: 지라 이슈를 만들지 않을래요
-
-  - type: input
-    id: due_date
-    attributes:
-      label: '개발 기한은 언제인가요?'
-      description: '비워두시면 다음날로 저장할게요.'
-      placeholder: 'YYYY-MM-DD'
-    validations:
-      required: false
+        - label: 브랜치를 생성하지 않을래요.

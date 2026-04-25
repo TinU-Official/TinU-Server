@@ -59,7 +59,8 @@ jobs:
           spring.security.oauth2.client.provider.naver.token-uri=${{ secrets.NAVER_TOKEN_URI }}
           spring.security.oauth2.client.provider.naver.user-info-uri=${{ secrets.NAVER_USER_INFO_URI }}
           spring.security.oauth2.client.provider.naver.user-name-attribute=${{ secrets.NAVER_USER_NAME_ATTRIBUTE }}
-          jwt.secret=${{ secrets.JWT_SECRET }}
+          jwt.access-token.secret=${{ secrets.JWT_SECRET }}
+          jwt.refresh-token.secret=${{ secrets.JWT_REFRESH_SECRET }}
           jwt.redirect=${{ secrets.JWT_REDIRECT_URI }}
           jwt.access-token.expiration-time=${{ secrets.JWT_ACCESS_TOKEN_EXPIRATION_TIME }}
           jwt.refresh-token.expiration-time=${{ secrets.JWT_REFRESH_TOKEN_EXPIRATION_TIME }}

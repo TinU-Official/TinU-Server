@@ -2,9 +2,9 @@ package com.tinuproject.tinu.infra.security.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
-import com.tinuproject.tinu.infra.security.filter.ExceptionHandlerFilter
 import com.tinuproject.tinu.infra.security.filter.JwtTokenFilter
-import com.tinuproject.tinu.infra.security.filter.SignUpFilter
+import com.tinuproject.tinu.infra.security.handler.CustomAccessDeniedHandler
+import com.tinuproject.tinu.infra.security.handler.CustomAuthenticationEntryPoint
 import com.tinuproject.tinu.infra.security.jwt.AppleJwtGenerator
 import com.tinuproject.tinu.infra.security.jwt.JwtUtil
 import com.tinuproject.tinu.infra.security.oauth.handler.OAuthLoginFailureHandler
@@ -13,6 +13,7 @@ import com.tinuproject.tinu.infra.security.oauth.resolver.CustomAuthorizationReq
 import com.tinuproject.tinu.infra.security.oauth.service.CustomOAuth2UserService
 import com.tinuproject.tinu.infra.security.oauth.tokenresponseclient.AppleTokenResponseClient
 import com.tinuproject.tinu.infra.security.oauth.tokenresponseclient.CustomTokenResponseClient
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,7 +33,9 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.cli
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
@@ -42,10 +45,8 @@ class SecurityConfig(
     private val oauth2LoginSuccessHandler: OAuthLoginSuccessHandler,
     private val oAuthLoginFailureHandler: OAuthLoginFailureHandler,
     private val customOAuth2UserService: CustomOAuth2UserService,
-    private val memberRepository: MemberRepository,
-    @Value("\${web.allowed-path}")
-    private val allowedPaths : List<String>,
-    private val objectMapper: ObjectMapper,
+    private val customAuthenticationEntryPoint: AuthenticationEntryPoint,
+    private val customAccessDeniedHandler: AccessDeniedHandler
 ) {
 
     @Bean
@@ -88,40 +89,62 @@ class SecurityConfig(
                 Customizer { authorize ->
                     authorize
                         //TODO(배포 전 로그인 되어 있어야만 서비스 이용가능하게 변경)
-                        .requestMatchers("/api/token/**").permitAll()
-                        .anyRequest().permitAll()//로그인 이후엔 모두 허용
+                        .requestMatchers("/test/permit-all").permitAll()
+                        .requestMatchers("/test/authenticated").fullyAuthenticated()
+                        .requestMatchers("/test/user").hasRole("USER")
+                        .requestMatchers(
+                            "/login",
+                            "/favicon.ico",
+                            "/api/token/refresh",
+                            "/tinu/"
+                        ).permitAll()
+                        .requestMatchers("/api/user/**").hasRole("USER")
+                        .requestMatchers("/api/user").hasRole("USER")
+                        .anyRequest().authenticated()//로그인 이후엔 모두 허용
                 }
             )
-            .oauth2Login { oauth: OAuth2LoginConfigurer<HttpSecurity?> ->  // OAuth2 로그인 기능에 대한 여러 설정의 진입점
-                oauth
-                    .authorizationEndpoint{ endpoint ->
-                        endpoint
-                            .authorizationRequestResolver(CustomAuthorizationRequestResolver(clientRegisterRepository = clientRegistrationRepository))
-                    }
-                    .userInfoEndpoint { userInfo ->
-                        userInfo.userService(customOAuth2UserService) // CustomOAuth2UserService 등록
-                    }
-                    .tokenEndpoint{ token ->
-                        token.accessTokenResponseClient(CustomTokenResponseClient(appleTokenResponseClient = AppleTokenResponseClient{appleJwtGenerator.generate()}, defaultClient = DefaultAuthorizationCodeTokenResponseClient()))
-                    }
-                    //TODO(로그인이 필요한데 안된 부분이 있으면 넘길 수 있는 것.)- 기본은 (백엔드 도메인)/login
-                    //.loginPage("http://localhost:8080/loginpage.html").permitAll()
-                    .successHandler(oauth2LoginSuccessHandler) // 로그인 성공 시 핸들러
-                    .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
-            }
             .sessionManagement {
                 Customizer { session: SessionManagementConfigurer<HttpSecurity?> ->
                     session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 }
             }
+            .exceptionHandling {
+                // 인증 실패 (401) -> CustomAuthenticationEntryPoint
+                it.authenticationEntryPoint(customAuthenticationEntryPoint)
 
+                // 인가 실패 (403) -> CustomAccessDeniedHandler
+                it.accessDeniedHandler(customAccessDeniedHandler)
+            }
+            .oauth2Login { oauth ->
+                oauth
+                    .authorizationEndpoint { endpoint ->
+                        endpoint.authorizationRequestResolver(
+                            CustomAuthorizationRequestResolver(
+                                clientRegisterRepository = clientRegistrationRepository
+                            )
+                        )
+                    }
+                    .userInfoEndpoint { userInfo ->
+                        userInfo.userService(customOAuth2UserService)
+                    }
+                    .tokenEndpoint { token ->
+                        token.accessTokenResponseClient(
+                            CustomTokenResponseClient(
+                                appleTokenResponseClient = AppleTokenResponseClient {
+                                    appleJwtGenerator.generate()
+                                },
+                                defaultClient = DefaultAuthorizationCodeTokenResponseClient()
+                            )
+                        )
+                    }
+                    .successHandler(oauth2LoginSuccessHandler)
+                    .failureHandler(oAuthLoginFailureHandler)
+
+            }
 
             httpSecurity
-                .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil, excludeUrls =allowedPaths), UsernamePasswordAuthenticationFilter::class.java)
-                .addFilterBefore(ExceptionHandlerFilter(objectMapper), JwtTokenFilter::class.java)
-                .addFilterAfter(SignUpFilter(jwtUtil=jwtUtil, excludeUrls =  allowedPaths), JwtTokenFilter::class.java)
-
+                .addFilterBefore(JwtTokenFilter(jwtUtil = jwtUtil), UsernamePasswordAuthenticationFilter::class.java)
 
         return httpSecurity.build()
 
