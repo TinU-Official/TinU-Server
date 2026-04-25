@@ -16,7 +16,7 @@ import jakarta.persistence.*
 class ChatRoom(
 
     /** 상품. 채팅방이 어떤 상품에 대한 대화인지 식별. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "post_id", nullable = false)
     var post: Post,
 

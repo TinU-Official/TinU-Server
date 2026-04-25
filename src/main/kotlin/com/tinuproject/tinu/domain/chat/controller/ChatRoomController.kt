@@ -13,6 +13,7 @@ import com.tinuproject.tinu.global.response.ResponseEntityGenerator
 import com.tinuproject.tinu.global.response.dto.ResponseDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -103,7 +104,7 @@ class ChatRoomController(
     )
     fun createChatRoom(
         @AuthenticationPrincipal userId: UUID,
-        @RequestBody request: CreateChatRoomRequest
+        @Valid @RequestBody request: CreateChatRoomRequest
     ): ResponseEntity<ResponseDTO<CreateChatRoomResponse?>> {
         return ResponseEntityGenerator.onSuccess(
             chatRoomService.createOrEnterChatRoom(userId, request),
@@ -141,7 +142,7 @@ class ChatRoomController(
     fun markAsRead(
         @AuthenticationPrincipal userId: UUID,
         @PathVariable chatRoomId: Long,
-        @RequestBody request: MarkAsReadRequest
+        @Valid @RequestBody request: MarkAsReadRequest
     ): ResponseEntity<ResponseDTO<Void?>> {
         chatRoomService.markAsRead(userId, chatRoomId, request)
         return ResponseEntityGenerator.onSuccess()

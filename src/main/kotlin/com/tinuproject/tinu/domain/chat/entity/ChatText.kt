@@ -19,19 +19,19 @@ import jakarta.persistence.*
 class ChatText(
 
     /** 소속 채팅방. 메시지는 반드시 하나의 채팅방에 속함. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "chat_room_id", nullable = false)
     var chatRoom: ChatRoom,
 
     /** 작성자. 메시지 전송 시 buyer 또는 seller여야 함(별도 검증). */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
     var writer: Member,
 
-    @Column
+    @Column(nullable = false, length = 1000)
     var text: String,
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     var type: ChatType,
 
@@ -41,7 +41,7 @@ class ChatText(
      * - 목록 커서: (chatRoomId, order) 조합으로 uniquely 식별
      * - 컬럼명 chat_order: SQL 예약어 order 충돌 방지
      */
-    @Column(name = "chat_order")
+    @Column(name = "chat_order", nullable = false)
     var order: Long
 
 ) : BaseEntity()

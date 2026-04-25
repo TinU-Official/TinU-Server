@@ -90,11 +90,11 @@ class ChatRoomServiceImpl(
             )
         }
 
-        val nextCursorId = if (hasNext && rawList.isNotEmpty()) {
+        val nextCursorId: String? = if (hasNext && rawList.isNotEmpty()) {
             val last = rawList.last()
             "${last.chatRoomId}_${last.maxOrder}"
         } else {
-            ""
+            null
         }
 
         return ChatRoomListResponse(

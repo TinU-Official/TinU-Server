@@ -16,17 +16,20 @@ import java.time.LocalDateTime
 @Entity
 @Table(
     name = "chat_room_member",
-    indexes = [Index(name = "uk_chat_room_member", columnList = "member_id,chat_room_id", unique = true)]
+    indexes = [
+        Index(name = "uk_chat_room_member", columnList = "member_id,chat_room_id", unique = true),
+        Index(name = "idx_chat_room_member_member_deleted", columnList = "member_id,deleted_at")
+    ]
 )
 class ChatRoomMember(
 
     /** 참여 멤버. (member, chatRoom) unique로 멤버당 1개. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "member_id", nullable = false)
     var member: Member,
 
     /** 소속 채팅방. ChatRoomMember는 반드시 하나의 채팅방에 속함. */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "chat_room_id", nullable = false)
     var chatRoom: ChatRoom,
 
