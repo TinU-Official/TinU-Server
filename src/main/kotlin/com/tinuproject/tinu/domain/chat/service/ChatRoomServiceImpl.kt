@@ -152,7 +152,7 @@ class ChatRoomServiceImpl(
             postTitle = post.title,
             postPrice = post.price,
             postThumbnail = post.thumbnail,
-            postIsSell = post.isSell,
+            postIsSoldOut = post.isSoldOut,
             opponentHasLeft = opponentHasLeft,
             myRole = if (isBuyer) ChatRole.BUYER else ChatRole.SELLER
         )

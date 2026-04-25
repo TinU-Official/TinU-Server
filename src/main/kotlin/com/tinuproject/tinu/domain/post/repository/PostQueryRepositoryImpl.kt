@@ -35,7 +35,7 @@ class PostQueryRepositoryImpl(
                         post.thumbnail,
                         ConstantImpl.create(false),
                         post.scrapCount,
-                        post.isSell
+                        post.isSoldOut
                     )
                 )
                 .from(post)
@@ -93,7 +93,7 @@ class PostQueryRepositoryImpl(
 
     override fun eqOnlySell(onlySell: Boolean): BooleanExpression? {
         return when (onlySell) {
-            true -> post.isSell.eq(true)
+            true -> post.isSoldOut.eq(false)
             false -> null
         }
     }

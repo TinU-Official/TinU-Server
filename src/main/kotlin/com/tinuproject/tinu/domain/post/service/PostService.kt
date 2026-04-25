@@ -53,7 +53,7 @@ interface PostService {
     fun updatePostStatus(
             userId: UUID,
             postId: Long,
-            isSell: Boolean
+            isSoldOut: Boolean
     )
 
     fun updatePostHide(

@@ -11,7 +11,7 @@ data class ChatRoomInfoResponse(
     val postTitle: String,
     val postPrice: Int,
     val postThumbnail: String?,
-    val postIsSell: Boolean,
+    val postIsSoldOut: Boolean,
     val opponentHasLeft: Boolean,
     val myRole: ChatRole
 )

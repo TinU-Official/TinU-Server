@@ -20,5 +20,5 @@ data class PostListBodyResponse(
         @Schema(description = "판매글 좋아요 수", defaultValue = "10")
         val likeCount: Long,
         @Schema(description = "판매글 판매 여부", defaultValue = "true")
-        val isSell: Boolean
+        val isSoldOut: Boolean
 )

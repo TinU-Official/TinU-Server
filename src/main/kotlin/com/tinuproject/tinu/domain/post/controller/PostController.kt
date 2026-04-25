@@ -165,9 +165,9 @@ class PostController(
     fun updatePostStatus(
             @AuthenticationPrincipal userId: UUID,
             @PathVariable postId: Long,
-            @RequestParam(required = true) isSell: Boolean
+            @RequestParam(required = true) isSoldOut: Boolean
     ): ResponseEntity<ResponseDTO<NullResponse?>> {
-        postService.updatePostStatus(userId, postId, isSell)
+        postService.updatePostStatus(userId, postId, isSoldOut)
         return ResponseEntityGenerator.onSuccess()
     }
 

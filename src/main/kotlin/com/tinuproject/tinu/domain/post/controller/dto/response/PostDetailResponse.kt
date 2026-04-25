@@ -30,7 +30,7 @@ data class PostDetailResponse(
     @Schema(description = "결제 방법", defaultValue = "[0, 1]")
         val paymentMethod: Set<PaymentMethod>,
     @Schema(description = "판매글 판매 상태", defaultValue = "true")
-        val isSell: Boolean,
+        val isSoldOut: Boolean,
     @Schema(description = "판매글 좋아요 여부", defaultValue = "true")
         val isLike: Boolean,
     @Schema(description = "판매글 좋아요 수", defaultValue = "10")
