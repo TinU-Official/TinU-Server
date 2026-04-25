@@ -83,12 +83,12 @@ class ChatRoomController(
             - 응답: 날짜별 그룹핑(KST), isMine 구분.
         """
     )
-    fun getChatDetail(
+    fun getChatRoomDetail(
         @AuthenticationPrincipal userId: UUID,
         @PathVariable chatRoomId: Long
     ): ResponseEntity<ResponseDTO<ChatDetailResponse?>> {
         return ResponseEntityGenerator.onSuccess(
-            chatRoomDetailService.getChatDetail(userId, chatRoomId)
+            chatRoomDetailService.getChatRoomDetail(userId, chatRoomId)
         )
     }
 

@@ -44,7 +44,7 @@ class ChatRoomDetailServiceImpl(
      * PREV cursor 만 도입한다. NEXT 는 추가하지 않는다 (WebSocket 이 그 역할).
      */
     @Transactional(readOnly = true)
-    override fun getChatDetail(
+    override fun getChatRoomDetail(
         userId: UUID,
         chatRoomId: Long
     ): ChatDetailResponse {

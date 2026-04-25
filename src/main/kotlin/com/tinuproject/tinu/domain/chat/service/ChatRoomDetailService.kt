@@ -4,7 +4,7 @@ import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailRespon
 import java.util.UUID
 
 interface ChatRoomDetailService {
-    fun getChatDetail(
+    fun getChatRoomDetail(
         userId: UUID,
         chatRoomId: Long
     ): ChatDetailResponse

@@ -67,7 +67,7 @@ class ChatRoomServiceImpl(
         // unreadCount = maxOrder - lastReadOrder (order는 1부터 시작하는 채팅방 내 순차 번호)
         val lastReadChatIds = rawList.mapNotNull { it.lastReadChatId }.toSet()
         val lastReadOrderMap: Map<Long, Long> = if (lastReadChatIds.isNotEmpty()) {
-            chatTextRepository.findAllByIdIn(lastReadChatIds).associate { it.id!! to it.order }
+            chatTextRepository.findAllById(lastReadChatIds).associate { it.id!! to it.order }
         } else {
             emptyMap()
         }
@@ -214,16 +214,12 @@ class ChatRoomServiceImpl(
      */
     private fun resolveCursor(cursorId: String?): Pair<Long?, java.time.LocalDateTime?> {
         if (cursorId.isNullOrBlank()) return Pair(null, null)
-        return try {
-            val parts = cursorId.split("_")
-            if (parts.size != 2) return Pair(null, null)
-            val chatRoomId = parts[0].toLongOrNull() ?: return Pair(null, null)
-            val order = parts[1].toLongOrNull() ?: return Pair(null, null)
-            val cursorChatText = chatTextRepository.findByChatRoomIdAndOrder(chatRoomId, order)
-                ?: return Pair(null, null)
-            Pair(chatRoomId, cursorChatText.createdAt)
-        } catch (_: NumberFormatException) {
-            Pair(null, null)
-        }
+        val parts = cursorId.split("_")
+        if (parts.size != 2) return Pair(null, null)
+        val chatRoomId = parts[0].toLongOrNull() ?: return Pair(null, null)
+        val order = parts[1].toLongOrNull() ?: return Pair(null, null)
+        val cursorChatText = chatTextRepository.findByChatRoomIdAndOrder(chatRoomId, order)
+            ?: return Pair(null, null)
+        return Pair(chatRoomId, cursorChatText.createdAt)
     }
 }

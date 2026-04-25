@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface ChatTextRepository : JpaRepository<ChatText, Long> {
     fun findByChatRoomIdAndOrder(chatRoomId: Long, order: Long): ChatText?
-    fun findAllByIdIn(ids: Set<Long>): List<ChatText>
 
     // 페이징 없이 채팅방 전체 메시지를 시간순으로 반환. writer EntityGraph로 N+1 차단.
     @EntityGraph(attributePaths = ["writer"])
