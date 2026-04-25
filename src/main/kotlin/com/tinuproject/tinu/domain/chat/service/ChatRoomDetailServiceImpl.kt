@@ -1,15 +1,12 @@
 package com.tinuproject.tinu.domain.chat.service
 
-import com.tinuproject.tinu.domain.chat.controller.dto.request.ChatDetailRequest
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatMessageGroupByDateDto
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatMessageItemDto
 import com.tinuproject.tinu.domain.chat.entity.ChatText
-import com.tinuproject.tinu.domain.chat.enums.ChatDetailDirection
 import com.tinuproject.tinu.domain.chat.exception.ChatRoomNotFoundException
 import com.tinuproject.tinu.domain.chat.repository.ChatRoomMemberRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatRoomRepository
-import com.tinuproject.tinu.domain.chat.repository.ChatTextQueryRepository
 import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
@@ -25,19 +22,31 @@ class ChatRoomDetailServiceImpl(
     private val memberRepository: MemberRepository,
     private val chatRoomRepository: ChatRoomRepository,
     private val chatRoomMemberRepository: ChatRoomMemberRepository,
-    private val chatTextRepository: ChatTextRepository,
-    private val chatTextQueryRepository: ChatTextQueryRepository
+    private val chatTextRepository: ChatTextRepository
 ) : ChatRoomDetailService {
 
     companion object {
         private val KST = ZoneId.of("Asia/Seoul")
     }
 
+    /**
+     * 채팅방의 모든 메시지를 한 번에 ASC 로 반환한다.
+     *
+     * 초기 설계는 PREV/NEXT 커서 + size 페이지네이션이었으나, 1:1 중고거래 채팅 특성상
+     * 한 채팅방의 메시지 수가 페이지네이션이 의미를 가질 만큼(수천~수만 건) 쌓일 가능성이
+     * 매우 낮다고 판단해 페이징을 의도적으로 제거했다. 클라이언트/서버 양쪽의 페이징 로직과
+     * 테스트 비용이 평균 케이스에서 얻는 이득보다 컸다(YAGNI).
+     *
+     * 진입 이후 도착하는 신규 메시지는 WebSocket push 로만 수신한다. 클라이언트는
+     * "WebSocket subscribe 완료 → 본 API 호출" 순서를 지킬 것 (ChatText.id 로 중복 제거).
+     *
+     * 운영 모니터링에서 응답 size/시간이 문제되는 채팅방이 발견되면 그때 위로 스크롤용
+     * PREV cursor 만 도입한다. NEXT 는 추가하지 않는다 (WebSocket 이 그 역할).
+     */
     @Transactional(readOnly = true)
     override fun getChatDetail(
         userId: UUID,
-        chatRoomId: Long,
-        request: ChatDetailRequest
+        chatRoomId: Long
     ): ChatDetailResponse {
         val member = memberRepository.findMemberByUserId(userId) ?: throw NotExistMemberException()
         val chatRoom = chatRoomRepository.findById(chatRoomId).orElseThrow { ChatRoomNotFoundException() }
@@ -47,47 +56,9 @@ class ChatRoomDetailServiceImpl(
             ?: throw ForbiddenException()
         if (myChatRoomMember.deletedAt != null) throw ChatRoomNotFoundException()
 
-        val actualSize = request.size.coerceIn(1, 100)
+        val messages = chatTextRepository.findAllByChatRoomIdOrderByOrderAsc(chatRoomId)
 
-        // cursor 유효성 검사: ChatText.id → chat_order 추출
-        val cursorOrder = resolveCursorOrder(request.cursor, chatRoomId)
-
-        // size+1 조회하여 hasNext/hasPrev 판단
-        val rawList = chatTextQueryRepository.findByCursor(
-            chatRoomId = chatRoomId,
-            cursorOrder = cursorOrder,
-            direction = request.direction,
-            size = actualSize + 1
-        )
-
-        val direction = if (cursorOrder == null) ChatDetailDirection.NEXT else request.direction
-        val hasPrev: Boolean
-        val hasNext: Boolean
-        val messages: List<ChatText>
-
-        when (direction) {
-            ChatDetailDirection.PREV -> {
-                hasPrev = rawList.size > actualSize
-                hasNext = false
-                messages = if (hasPrev) rawList.subList(0, actualSize) else rawList
-            }
-            ChatDetailDirection.NEXT -> {
-                hasNext = rawList.size > actualSize
-                hasPrev = false
-                messages = if (hasNext) rawList.subList(0, actualSize) else rawList
-            }
-        }
-
-        // PREV로 가져오면 desc 정렬이므로 클라이언트에 과거→최신 순으로 뒤집어서 줌
-        val sortedMessages = when (direction) {
-            ChatDetailDirection.PREV -> messages.sortedBy { it.order }
-            ChatDetailDirection.NEXT -> messages
-        }
-
-        val prevCursor = if (hasPrev) sortedMessages.firstOrNull()?.id else null
-        val nextCursor = if (hasNext) sortedMessages.lastOrNull()?.id else null
-
-        val grouped = sortedMessages
+        val grouped = messages
             .groupBy { it.createdAt!!.atZone(KST).toLocalDate() }
             .entries
             .sortedBy { it.key }
@@ -106,25 +77,7 @@ class ChatRoomDetailServiceImpl(
                 )
             }
 
-        return ChatDetailResponse(
-            messages = grouped,
-            prevCursor = prevCursor,
-            nextCursor = nextCursor,
-            hasPrev = hasPrev,
-            hasNext = hasNext
-        )
-    }
-
-    /**
-     * cursor(ChatText.id)를 받아 해당 채팅방의 chat_order를 반환.
-     * cursor가 null이거나 유효하지 않으면(다른 채팅방 소속 포함) null 반환
-     * → null이면 0번째부터 NEXT 조회로 간주 (최신 size개 반환).
-     */
-    private fun resolveCursorOrder(cursor: Long?, chatRoomId: Long): Long? {
-        if (cursor == null) return null
-        val chatText = chatTextRepository.findById(cursor).orElse(null) ?: return null
-        if (chatText.chatRoom.id != chatRoomId) return null
-        return chatText.order
+        return ChatDetailResponse(messages = grouped)
     }
 
     private fun toKst(chatText: ChatText): ZonedDateTime =

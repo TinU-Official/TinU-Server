@@ -1,13 +1,11 @@
 package com.tinuproject.tinu.domain.chat.controller
 
-import com.tinuproject.tinu.domain.chat.controller.dto.request.ChatDetailRequest
 import com.tinuproject.tinu.domain.chat.controller.dto.request.CreateChatRoomRequest
 import com.tinuproject.tinu.domain.chat.controller.dto.request.MarkAsReadRequest
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatDetailResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomInfoResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.ChatRoomListResponse
 import com.tinuproject.tinu.domain.chat.controller.dto.response.CreateChatRoomResponse
-import com.tinuproject.tinu.domain.chat.enums.ChatDetailDirection
 import com.tinuproject.tinu.domain.chat.enums.ChatRoomFilter
 import com.tinuproject.tinu.domain.chat.service.ChatRoomDetailService
 import com.tinuproject.tinu.domain.chat.service.ChatRoomService
@@ -78,23 +76,18 @@ class ChatRoomController(
     @Operation(
         summary = "채팅 상세 조회",
         description = """
-            채팅방의 메시지 목록을 커서 기반 페이징으로 조회합니다.
-            - cursor: ChatText.id (null이면 초기 진입 → 최신 size개 반환)
-            - direction: PREV(위로 스크롤, 과거) / NEXT(아래로 스크롤, 최신). 기본값 PREV
-            - cursor 없을 때는 0번째부터 NEXT 방향으로 간주 (최신 size개)
-            - 응답: 날짜별 그룹핑(KST), isMine 구분, prevCursor/nextCursor, hasPrev/hasNext
+            채팅방의 모든 메시지를 시간순(ASC)으로 한 번에 반환합니다.
+            - 페이징/커서 없음. 진입 이후 신규 메시지는 WebSocket으로만 수신.
+            - 클라이언트는 'WebSocket subscribe 완료 → 본 API 호출' 순서를 지킬 것 (중복은 ChatText.id로 제거).
+            - 응답: 날짜별 그룹핑(KST), isMine 구분.
         """
     )
     fun getChatDetail(
         @AuthenticationPrincipal userId: UUID,
-        @PathVariable chatRoomId: Long,
-        @RequestParam(required = false) cursor: Long?,
-        @RequestParam(defaultValue = "PREV") direction: ChatDetailDirection,
-        @RequestParam(defaultValue = "20") size: Int
+        @PathVariable chatRoomId: Long
     ): ResponseEntity<ResponseDTO<ChatDetailResponse?>> {
-        val request = ChatDetailRequest(cursor = cursor, direction = direction, size = size)
         return ResponseEntityGenerator.onSuccess(
-            chatRoomDetailService.getChatDetail(userId, chatRoomId, request)
+            chatRoomDetailService.getChatDetail(userId, chatRoomId)
         )
     }
 
