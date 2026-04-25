@@ -83,17 +83,17 @@ class ChatRoomQueryRepositoryImpl(
             .fetch()
     }
 
-    /** 필터 조건: ALL=myCRM join으로 이미 필터링됨, PURCHASE=내가 buyer, SALE=내가 seller */
+    /** 필터 조건: ALL=myNotLeft에서 이미 멤버십 필터링됨, PURCHASE=내가 buyer, SALE=내가 seller */
     private fun filterCondition(filter: ChatRoomFilter): BooleanExpression? =
         when (filter) {
-            ChatRoomFilter.ALL -> null  // myCRM join으로 이미 memberId 필터링됨
+            ChatRoomFilter.ALL -> null
             ChatRoomFilter.PURCHASE -> myCRM.role.eq(ChatRole.BUYER)
             ChatRoomFilter.SALE -> myCRM.role.eq(ChatRole.SELLER)
         }
 
-    /** 나간 채팅방 제외: 내 ChatRoomMember가 없거나(마이그레이션) deletedAt이 null인 경우만 표시 */
+    /** 참여 중인 채팅방만: 내 ChatRoomMember가 존재하고 deletedAt이 null. */
     private fun myNotLeft(): BooleanExpression =
-        myCRM.id.isNull.or(myCRM.deletedAt.isNull)
+        myCRM.id.isNotNull.and(myCRM.deletedAt.isNull)
 
     /**
      * 복합 커서 조건.
