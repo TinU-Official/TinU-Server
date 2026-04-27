@@ -9,19 +9,17 @@ import com.tinuproject.tinu.domain.member.service.dto.output.Tokens
 import com.tinuproject.tinu.domain.member.service.RefreshTokenService
 import com.tinuproject.tinu.global.exception.base.BaseException
 import com.tinuproject.tinu.infra.swagger.annotation.SwaggerExceptionResponses
-import com.tinuproject.tinu.global.web.CookieGenerator
 import com.tinuproject.tinu.global.response.dto.NullResponse
 import com.tinuproject.tinu.global.response.ResponseEntityGenerator
+import com.tinuproject.tinu.global.web.RefreshTokenResolver
 import com.tinuproject.tinu.infra.security.exception.auth.NeedLoginException
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.web.server.Cookie
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -31,54 +29,32 @@ import org.springframework.web.bind.annotation.RestController
 class RefreshTokenController(
     private val refreshTokenService : RefreshTokenService,
 
-    @Value("\${cookie.token.access-token}")
-    private val accessTokenKey: String,
+    private val refreshTokenResolver: RefreshTokenResolver,
 
-    @Value("\${cookie.token.refresh-token}")
-    private val refreshTokenKey : String,
+    @param:Value("\${jwt.header.access-token}")
+    private val accessTokenHeaderName: String,
 
-    @Value("\${jwt.refresh-token.expiration-time}")
-    private val refreshTokenExpiredTime : Long,
-
-    @Value("\${jwt.access-token.expiration-time}")
-    private val accessTokenExpiredTime : Long
+    @param:Value("\${jwt.header.refresh-token}")
+    private val refreshTokenHeaderName : String,
 ) {
     var log : Logger = LoggerFactory.getLogger(this::class.java)
 
 
-    @GetMapping("/refresh")
+    @GetMapping("/reissue")
     @SwaggerExceptionResponses(exceptions = [NotFoundTokenException::class, InvalidedTokenException::class, ExpiredTokenException::class, ])
     @Operation(summary = "AccessToken 재발급 API", description = "RefreshToken을 통해 AccessToken을 재발급 받는 로직입니다.")
-    fun refreshAccessToken(httpServletResponse: HttpServletResponse, @CookieValue(name = "refresh-token") refreshToken : String?): ResponseEntity<ResponseDTO<NullResponse?>> {
+    fun refreshAccessToken(request : HttpServletRequest, response: HttpServletResponse): ResponseEntity<ResponseDTO<NullResponse?>> {
         log.info("AccessToken 갱신 시도")
 
         try{
-            refreshToken?:throw NotFoundTokenException()
+            val refreshToken = refreshTokenResolver.resolve(request)
 
             val tokens : Tokens = refreshTokenService.reissueAccessTokenByRefreshToken(refreshToken)
 
-            //TODO("이후 프로젝트 완성 시 NONE에서 LAX 로 변경")
-            httpServletResponse.addHeader(
-                HttpHeaders.SET_COOKIE,
-                CookieGenerator.createCookies(
-                    key = accessTokenKey,
-                    value =tokens.accessToken,
-                    sameSite =  Cookie.SameSite.NONE,
-                    maxAge = accessTokenExpiredTime/1000
-                )
-            )
+            response.addHeader(accessTokenHeaderName, "Bearer ${tokens.accessToken}")
 
-            //TODO("이후 프로젝트 완성 시 NONE에서 Strict 로 변경")
-            httpServletResponse.addHeader(
-                HttpHeaders.SET_COOKIE,
-                CookieGenerator.createCookies(
-                    key = refreshTokenKey,
-                    value =  tokens.refreshToken,
-                    path =  "/api/token",
-                    sameSite = Cookie.SameSite.NONE,
-                    maxAge = refreshTokenExpiredTime/1000
-                )
-            )
+            response.addHeader(refreshTokenHeaderName, tokens.refreshToken)
+
             return ResponseEntityGenerator.onSuccess()
         }catch(e : NotFoundTokenException){
             log.warn("RefreshToken이 없습니다. 다시 로그인을 진행해야합니다.")

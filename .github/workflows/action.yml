@@ -101,6 +101,8 @@ jobs:
           apple.team_id= ${{ secrets.APPLE_TEAM_ID }}
           apple.login_key = ${{ secrets.APPLE_LOGIN_KEY }}
           apple.jwk-key-uri = ${{ secrets.APPLE_PUBLIC_KEY_URI }}
+          jwt.header.access-token=Authorization
+          jwt.header.refresh-token=Refresh-Token
           EOF
 
   backend-deploy:

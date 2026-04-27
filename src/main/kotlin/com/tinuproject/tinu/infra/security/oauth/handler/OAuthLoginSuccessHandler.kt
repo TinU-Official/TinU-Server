@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 
 import java.util.*
 
@@ -67,15 +68,20 @@ class OAuthLoginSuccessHandler(
             String.format(SIGN_REDIRECT_URL)
         }
 
-        //TODO(이후 프로젝트 완성시  NONE에서 STRICT로 변경)
-        response?.addHeader(HttpHeaders.SET_COOKIE, CookieGenerator.createCookies(
-            key = REFRESH_TOKEN_KEY,
-            value =  refreshToken,
-            path =  "/api/token",
-            sameSite = Cookie.SameSite.NONE,
-            maxAge = jwtProperties.refreshToken.expirationTime/1000
-        ))
-        response?.sendRedirect(redirectUri)
+        //TODO(임시로 쿼리 파람으로 Token을 포함시켜서 응답)
+        //TODO(이후 운영 이전 어떤 방식으로 할 지 추가 논의)
+        val targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+            .queryParam("token", refreshToken)
+            .build().toUriString()
+
+//        response?.addHeader(HttpHeaders.SET_COOKIE, CookieGenerator.createCookies(
+//            key = REFRESH_TOKEN_KEY,
+//            value =  refreshToken,
+//            path =  "/api/token",
+//            sameSite = Cookie.SameSite.NONE,
+//            maxAge = jwtProperties.refreshToken.expirationTime/1000
+//        ))
+        response?.sendRedirect(targetUrl)
     }
 
 
