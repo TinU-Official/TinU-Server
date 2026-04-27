@@ -28,6 +28,7 @@ import com.tinuproject.tinu.global.exception.ForbiddenException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.UUID
 
 @Service
@@ -185,7 +186,7 @@ class ChatRoomServiceImpl(
     ) {
         val (_, _, myCrm, _) = resolveChatRoomAccess(userId, chatRoomId)
         if (myCrm.deletedAt != null) return
-        myCrm.deletedAt = LocalDateTime.now()
+        myCrm.deletedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
     }
 
     private data class ChatRoomAccess(
