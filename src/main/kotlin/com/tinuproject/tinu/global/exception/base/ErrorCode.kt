@@ -55,6 +55,12 @@ enum class ErrorCode(
     //리뷰 관련
     REVIEW_ALREADY_EXIST(httpStatusCode = 409, stateCode = "REVIEW_ALREADY_EXIST", message = "이미 리뷰를 작성하셨습니다."),
 
+    //채팅 관련
+    CHAT_ROOM_NOT_FOUND(httpStatusCode = 404, stateCode = "CHAT_ROOM_NOT_FOUND", message = "채팅방이 존재하지 않습니다."),
+    CHAT_ROOM_SELF_CHAT(httpStatusCode = 400, stateCode = "CHAT_ROOM_SELF_CHAT", message = "자기 자신에게 채팅을 보낼 수 없습니다."),
+    CHAT_ROOM_MEMBER_NOT_FOUND(httpStatusCode = 404, stateCode = "CHAT_ROOM_MEMBER_NOT_FOUND", message = "채팅방 멤버 정보가 존재하지 않습니다."),
+    CHAT_READ_INVALID_CURSOR(httpStatusCode = 400, stateCode = "CHAT_READ_INVALID_CURSOR", message = "유효하지 않은 읽음 커서입니다."),
+
     //전역적 사용
     UNIVERSITY_NOT_MATCH(httpStatusCode = 403, stateCode = "UNIVERSITY_NOT_MATCH", message = "대학이 일치하지 않습니다."),
     NOT_FOUND(httpStatusCode = 404, stateCode = "NOT_FOUND", message = "없는 페이지입니다."),
