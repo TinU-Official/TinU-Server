@@ -11,6 +11,7 @@ import com.tinuproject.tinu.domain.chat.repository.ChatTextRepository
 import com.tinuproject.tinu.domain.member.exception.NotExistMemberException
 import com.tinuproject.tinu.domain.member.repository.MemberRepository
 import com.tinuproject.tinu.global.exception.ForbiddenException
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.ZoneId
@@ -27,6 +28,7 @@ class ChatRoomDetailServiceImpl(
 
     companion object {
         private val KST = ZoneId.of("Asia/Seoul")
+        private const val MAX_MESSAGES_PER_FETCH = 5_000
     }
 
     /**
@@ -56,7 +58,10 @@ class ChatRoomDetailServiceImpl(
             ?: throw ForbiddenException()
         if (myChatRoomMember.deletedAt != null) throw ChatRoomNotFoundException()
 
-        val messages = chatTextRepository.findAllByChatRoomIdOrderByOrderAsc(chatRoomId)
+        val messages = chatTextRepository.findAllByChatRoomIdOrderByOrderAsc(
+            chatRoomId,
+            PageRequest.of(0, MAX_MESSAGES_PER_FETCH)
+        )
 
         val grouped = messages
             .groupBy { it.createdAt!!.atZone(KST).toLocalDate() }
